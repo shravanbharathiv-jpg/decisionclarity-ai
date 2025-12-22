@@ -14,7 +14,126 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      decisions: {
+        Row: {
+          ai_bias_explanation: string | null
+          ai_insight_summary: string | null
+          ai_scenario_analysis: string | null
+          best_case_scenario: string | null
+          biases_acknowledged: string | null
+          biggest_fear: string | null
+          created_at: string
+          current_step: number
+          decision_summary: string | null
+          description: string | null
+          detected_biases: Json | null
+          do_nothing_outcome: string | null
+          final_decision: string | null
+          future_regret: string | null
+          id: string
+          is_locked: boolean | null
+          is_reversible: string | null
+          key_reasons: string | null
+          likely_case_scenario: string | null
+          locked_at: string | null
+          risks_accepted: string | null
+          status: string
+          time_horizon: string | null
+          title: string
+          updated_at: string
+          user_id: string
+          worst_case_scenario: string | null
+        }
+        Insert: {
+          ai_bias_explanation?: string | null
+          ai_insight_summary?: string | null
+          ai_scenario_analysis?: string | null
+          best_case_scenario?: string | null
+          biases_acknowledged?: string | null
+          biggest_fear?: string | null
+          created_at?: string
+          current_step?: number
+          decision_summary?: string | null
+          description?: string | null
+          detected_biases?: Json | null
+          do_nothing_outcome?: string | null
+          final_decision?: string | null
+          future_regret?: string | null
+          id?: string
+          is_locked?: boolean | null
+          is_reversible?: string | null
+          key_reasons?: string | null
+          likely_case_scenario?: string | null
+          locked_at?: string | null
+          risks_accepted?: string | null
+          status?: string
+          time_horizon?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+          worst_case_scenario?: string | null
+        }
+        Update: {
+          ai_bias_explanation?: string | null
+          ai_insight_summary?: string | null
+          ai_scenario_analysis?: string | null
+          best_case_scenario?: string | null
+          biases_acknowledged?: string | null
+          biggest_fear?: string | null
+          created_at?: string
+          current_step?: number
+          decision_summary?: string | null
+          description?: string | null
+          detected_biases?: Json | null
+          do_nothing_outcome?: string | null
+          final_decision?: string | null
+          future_regret?: string | null
+          id?: string
+          is_locked?: boolean | null
+          is_reversible?: string | null
+          key_reasons?: string | null
+          likely_case_scenario?: string | null
+          locked_at?: string | null
+          risks_accepted?: string | null
+          status?: string
+          time_horizon?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          worst_case_scenario?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          stripe_payment_intent_id: string | null
+          stripe_payment_status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          stripe_payment_intent_id?: string | null
+          stripe_payment_status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          stripe_payment_intent_id?: string | null
+          stripe_payment_status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

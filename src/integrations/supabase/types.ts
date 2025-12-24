@@ -14,14 +14,166 @@ export type Database = {
   }
   public: {
     Tables: {
+      bias_profiles: {
+        Row: {
+          ai_profile_summary: string | null
+          common_biases: Json | null
+          created_at: string
+          fear_patterns: string | null
+          id: string
+          overconfidence_patterns: string | null
+          risk_tolerance: string | null
+          total_decisions_analyzed: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_profile_summary?: string | null
+          common_biases?: Json | null
+          created_at?: string
+          fear_patterns?: string | null
+          id?: string
+          overconfidence_patterns?: string | null
+          risk_tolerance?: string | null
+          total_decisions_analyzed?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_profile_summary?: string | null
+          common_biases?: Json | null
+          created_at?: string
+          fear_patterns?: string | null
+          id?: string
+          overconfidence_patterns?: string | null
+          risk_tolerance?: string | null
+          total_decisions_analyzed?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      decision_comparisons: {
+        Row: {
+          ai_comparison_analysis: string | null
+          asymmetric_upside: string | null
+          created_at: string
+          decision_ids: string[]
+          emotional_bias_differences: string | null
+          hidden_costs: string | null
+          id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_comparison_analysis?: string | null
+          asymmetric_upside?: string | null
+          created_at?: string
+          decision_ids: string[]
+          emotional_bias_differences?: string | null
+          hidden_costs?: string | null
+          id?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_comparison_analysis?: string | null
+          asymmetric_upside?: string | null
+          created_at?: string
+          decision_ids?: string[]
+          emotional_bias_differences?: string | null
+          hidden_costs?: string | null
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      decision_reflections: {
+        Row: {
+          aged_well: boolean | null
+          ai_reflection_analysis: string | null
+          created_at: string
+          decision_id: string
+          id: string
+          reflection_type: string
+          user_id: string
+          what_differently: string | null
+          what_surprised: string | null
+        }
+        Insert: {
+          aged_well?: boolean | null
+          ai_reflection_analysis?: string | null
+          created_at?: string
+          decision_id: string
+          id?: string
+          reflection_type: string
+          user_id: string
+          what_differently?: string | null
+          what_surprised?: string | null
+        }
+        Update: {
+          aged_well?: boolean | null
+          ai_reflection_analysis?: string | null
+          created_at?: string
+          decision_id?: string
+          id?: string
+          reflection_type?: string
+          user_id?: string
+          what_differently?: string | null
+          what_surprised?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "decision_reflections_decision_id_fkey"
+            columns: ["decision_id"]
+            isOneToOne: false
+            referencedRelation: "decisions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      decision_templates: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          id: string
+          name: string
+          questions: Json
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description: string
+          id: string
+          name: string
+          questions: Json
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          name?: string
+          questions?: Json
+        }
+        Relationships: []
+      }
       decisions: {
         Row: {
           ai_bias_explanation: string | null
           ai_insight_summary: string | null
           ai_scenario_analysis: string | null
+          ai_second_order_analysis: string | null
           best_case_scenario: string | null
           biases_acknowledged: string | null
           biggest_fear: string | null
+          category: string | null
+          confidence_rating: number | null
           created_at: string
           current_step: number
           decision_summary: string | null
@@ -36,8 +188,11 @@ export type Database = {
           key_reasons: string | null
           likely_case_scenario: string | null
           locked_at: string | null
+          outcome: string | null
           risks_accepted: string | null
+          second_order_effects: string | null
           status: string
+          template_id: string | null
           time_horizon: string | null
           title: string
           updated_at: string
@@ -48,9 +203,12 @@ export type Database = {
           ai_bias_explanation?: string | null
           ai_insight_summary?: string | null
           ai_scenario_analysis?: string | null
+          ai_second_order_analysis?: string | null
           best_case_scenario?: string | null
           biases_acknowledged?: string | null
           biggest_fear?: string | null
+          category?: string | null
+          confidence_rating?: number | null
           created_at?: string
           current_step?: number
           decision_summary?: string | null
@@ -65,8 +223,11 @@ export type Database = {
           key_reasons?: string | null
           likely_case_scenario?: string | null
           locked_at?: string | null
+          outcome?: string | null
           risks_accepted?: string | null
+          second_order_effects?: string | null
           status?: string
+          template_id?: string | null
           time_horizon?: string | null
           title: string
           updated_at?: string
@@ -77,9 +238,12 @@ export type Database = {
           ai_bias_explanation?: string | null
           ai_insight_summary?: string | null
           ai_scenario_analysis?: string | null
+          ai_second_order_analysis?: string | null
           best_case_scenario?: string | null
           biases_acknowledged?: string | null
           biggest_fear?: string | null
+          category?: string | null
+          confidence_rating?: number | null
           created_at?: string
           current_step?: number
           decision_summary?: string | null
@@ -94,8 +258,11 @@ export type Database = {
           key_reasons?: string | null
           likely_case_scenario?: string | null
           locked_at?: string | null
+          outcome?: string | null
           risks_accepted?: string | null
+          second_order_effects?: string | null
           status?: string
+          template_id?: string | null
           time_horizon?: string | null
           title?: string
           updated_at?: string
@@ -107,28 +274,46 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          decisions_used_this_month: number | null
           email: string
           id: string
+          last_decision_reset: string | null
+          stripe_customer_id: string | null
           stripe_payment_intent_id: string | null
           stripe_payment_status: string | null
+          subscription_end_date: string | null
+          subscription_status: string | null
+          subscription_tier: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          decisions_used_this_month?: number | null
           email: string
           id?: string
+          last_decision_reset?: string | null
+          stripe_customer_id?: string | null
           stripe_payment_intent_id?: string | null
           stripe_payment_status?: string | null
+          subscription_end_date?: string | null
+          subscription_status?: string | null
+          subscription_tier?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
+          decisions_used_this_month?: number | null
           email?: string
           id?: string
+          last_decision_reset?: string | null
+          stripe_customer_id?: string | null
           stripe_payment_intent_id?: string | null
           stripe_payment_status?: string | null
+          subscription_end_date?: string | null
+          subscription_status?: string | null
+          subscription_tier?: string | null
           updated_at?: string
           user_id?: string
         }

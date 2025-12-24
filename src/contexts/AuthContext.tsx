@@ -7,6 +7,8 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   hasPaid: boolean;
+  hasSubscription: boolean;
+  subscriptionTier: 'free' | 'premium' | 'lifetime';
   checkPaymentStatus: () => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -26,19 +28,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasPaid, setHasPaid] = useState(false);
+  const [hasSubscription, setHasSubscription] = useState(false);
+  const [subscriptionTier, setSubscriptionTier] = useState<'free' | 'premium' | 'lifetime'>('free');
 
   const checkPaymentStatus = async () => {
     if (!session) return;
     
     try {
-      const { data, error } = await supabase.functions.invoke('check-payment');
-      if (error) {
-        console.error('Error checking payment status:', error);
-        return;
+      // Check one-time payment
+      const { data: paymentData, error: paymentError } = await supabase.functions.invoke('check-payment');
+      if (!paymentError && paymentData?.hasPaid) {
+        setHasPaid(true);
+        setSubscriptionTier('lifetime');
       }
-      setHasPaid(data?.hasPaid || false);
+
+      // Check subscription
+      const { data: subData, error: subError } = await supabase.functions.invoke('check-subscription');
+      if (!subError) {
+        setHasSubscription(subData?.subscribed || false);
+        if (subData?.tier) {
+          setSubscriptionTier(subData.tier as 'free' | 'premium' | 'lifetime');
+        }
+        if (subData?.hasLifetimeAccess) {
+          setHasPaid(true);
+          setSubscriptionTier('lifetime');
+        }
+      }
     } catch (error) {
-      console.error('Error checking payment:', error);
+      console.error('Error checking payment status:', error);
     }
   };
 
@@ -47,17 +64,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
     setSession(null);
     setHasPaid(false);
+    setHasSubscription(false);
+    setSubscriptionTier('free');
   };
 
   useEffect(() => {
-    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
 
-        // Check payment status when user logs in
         if (session?.user) {
           setTimeout(() => {
             checkPaymentStatus();
@@ -66,7 +83,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
 
-    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -82,12 +98,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
+  const hasAccess = hasPaid || hasSubscription || subscriptionTier !== 'free';
+
   return (
     <AuthContext.Provider value={{ 
       user, 
       session, 
       loading, 
-      hasPaid, 
+      hasPaid: hasAccess, 
+      hasSubscription,
+      subscriptionTier,
       checkPaymentStatus,
       signOut 
     }}>

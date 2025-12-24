@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Decision } from '@/pages/DecisionFlow';
+import { Decision } from '@/types/decision';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Calendar, CheckCircle2, Sparkles, AlertTriangle } from 'lucide-react';

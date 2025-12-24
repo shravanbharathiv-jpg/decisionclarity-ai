@@ -7,36 +7,11 @@ import { Loader2 } from 'lucide-react';
 import { StepDeconstruction } from '@/components/decision/StepDeconstruction';
 import { StepScenarios } from '@/components/decision/StepScenarios';
 import { StepBiasCheck } from '@/components/decision/StepBiasCheck';
+import { StepSecondOrder } from '@/components/decision/StepSecondOrder';
 import { StepLock } from '@/components/decision/StepLock';
 import { DecisionComplete } from '@/components/decision/DecisionComplete';
 import { PaywallModal } from '@/components/PaywallModal';
-
-export interface Decision {
-  id: string;
-  title: string;
-  description: string | null;
-  status: string;
-  current_step: number;
-  time_horizon: string | null;
-  is_reversible: string | null;
-  do_nothing_outcome: string | null;
-  biggest_fear: string | null;
-  future_regret: string | null;
-  ai_insight_summary: string | null;
-  best_case_scenario: string | null;
-  likely_case_scenario: string | null;
-  worst_case_scenario: string | null;
-  ai_scenario_analysis: string | null;
-  detected_biases: string[] | null;
-  ai_bias_explanation: string | null;
-  final_decision: string | null;
-  decision_summary: string | null;
-  key_reasons: string | null;
-  risks_accepted: string | null;
-  biases_acknowledged: string | null;
-  is_locked: boolean;
-  locked_at: string | null;
-}
+import { Decision } from '@/types/decision';
 
 const DecisionFlow = () => {
   const { id } = useParams<{ id: string }>();
@@ -74,7 +49,6 @@ const DecisionFlow = () => {
         return;
       }
 
-      // Parse detected_biases if it's stored as JSON
       const parsedDecision = {
         ...data,
         detected_biases: data.detected_biases ? 
@@ -94,7 +68,7 @@ const DecisionFlow = () => {
   }, [id, user, navigate, toast]);
 
   const updateDecision = async (updates: Partial<Decision>) => {
-    if (!decision) return;
+    if (!decision) return false;
 
     const { error } = await supabase
       .from('decisions')
@@ -117,7 +91,6 @@ const DecisionFlow = () => {
   const handleNextStep = async () => {
     if (!decision) return;
     
-    // Check if premium features require payment
     if (decision.current_step >= 2 && !hasPaid) {
       setShowPaywall(true);
       return;
@@ -144,7 +117,6 @@ const DecisionFlow = () => {
     return null;
   }
 
-  // If decision is locked, show the complete view
   if (decision.is_locked) {
     return <DecisionComplete decision={decision} />;
   }
@@ -177,6 +149,14 @@ const DecisionFlow = () => {
           />
         );
       case 5:
+        return (
+          <StepSecondOrder
+            decision={decision}
+            onUpdate={updateDecision}
+            onNext={handleNextStep}
+          />
+        );
+      case 6:
         return (
           <StepLock
             decision={decision}

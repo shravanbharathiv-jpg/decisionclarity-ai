@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, ArrowRight, Loader2, Sparkles, Lock } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-
+import { FormattedText } from '@/components/FormattedText';
 interface StepDeconstructionProps {
   decision: Decision;
   onUpdate: (updates: Partial<Decision>) => Promise<boolean>;
@@ -185,9 +185,7 @@ export const StepDeconstruction = ({ decision, onUpdate, onNext, hasPaid }: Step
                   <Sparkles className="h-5 w-5" />
                   <h3 className="font-semibold">AI Insight Summary</h3>
                 </div>
-                <div className="prose prose-sm max-w-none text-foreground">
-                  <p className="whitespace-pre-wrap leading-relaxed">{insight}</p>
-                </div>
+                <FormattedText content={insight} />
                 <Button onClick={handleContinue} className="w-full gap-2">
                   Continue to Scenario Modeling
                   <ArrowRight className="h-4 w-4" />

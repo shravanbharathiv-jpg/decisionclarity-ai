@@ -2,8 +2,9 @@ import { useNavigate } from 'react-router-dom';
 import { Decision } from '@/types/decision';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Calendar, CheckCircle2, Sparkles, AlertTriangle } from 'lucide-react';
-import { format } from 'date-fns';
+import { ArrowLeft, Calendar, CheckCircle2, Sparkles, AlertTriangle, Clock } from 'lucide-react';
+import { format, differenceInDays } from 'date-fns';
+import { FormattedText } from '@/components/FormattedText';
 
 interface DecisionCompleteProps {
   decision: Decision;
@@ -101,8 +102,58 @@ export const DecisionComplete = ({ decision }: DecisionCompleteProps) => {
                   AI Insights
                 </CardTitle>
               </CardHeader>
-              <CardContent className="prose prose-sm max-w-none text-foreground">
-                <p className="whitespace-pre-wrap">{decision.ai_insight_summary}</p>
+              <CardContent>
+                <FormattedText content={decision.ai_insight_summary} />
+              </CardContent>
+            </Card>
+          )}
+
+          {decision.ai_scenario_analysis && (
+            <Card className="border-border/50">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  Scenario Analysis
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <FormattedText content={decision.ai_scenario_analysis} />
+              </CardContent>
+            </Card>
+          )}
+
+          {decision.ai_second_order_analysis && (
+            <Card className="border-border/50">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  Second-Order Effects
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <FormattedText content={decision.ai_second_order_analysis} />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Reflection prompt for old decisions */}
+          {decision.locked_at && differenceInDays(new Date(), new Date(decision.locked_at)) >= 30 && (
+            <Card className="border-primary/20 bg-primary/5">
+              <CardContent className="py-6">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 rounded-full bg-primary/10">
+                    <Clock className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-foreground">Time for a reflection</p>
+                    <p className="text-sm text-muted-foreground">
+                      It's been {differenceInDays(new Date(), new Date(decision.locked_at))} days since you made this decision.
+                    </p>
+                  </div>
+                  <Button onClick={() => navigate(`/reflect/${decision.id}`)}>
+                    Reflect
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           )}

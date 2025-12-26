@@ -10,6 +10,9 @@ import Dashboard from "./pages/Dashboard";
 import NewDecision from "./pages/NewDecision";
 import DecisionFlow from "./pages/DecisionFlow";
 import PaymentSuccess from "./pages/PaymentSuccess";
+import Profile from "./pages/Profile";
+import Compare from "./pages/Compare";
+import Reflect from "./pages/Reflect";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,7 +30,10 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/decision/new" element={<NewDecision />} />
             <Route path="/decision/:id" element={<DecisionFlow />} />
+            <Route path="/reflect/:id" element={<Reflect />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/compare" element={<Compare />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

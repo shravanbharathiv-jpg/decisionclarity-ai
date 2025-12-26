@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, ArrowRight, Loader2, AlertTriangle, Sparkles } from 'lucide-react';
+import { FormattedText } from '@/components/FormattedText';
 
 interface StepBiasCheckProps {
   decision: Decision;
@@ -120,9 +121,7 @@ export const StepBiasCheck = ({ decision, onUpdate, onNext }: StepBiasCheckProps
                   </div>
                 )}
 
-                <div className="prose prose-sm max-w-none text-foreground">
-                  <p className="whitespace-pre-wrap leading-relaxed">{explanation}</p>
-                </div>
+                <FormattedText content={explanation} />
 
                 <div className="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground">
                   <p className="flex items-start gap-2">

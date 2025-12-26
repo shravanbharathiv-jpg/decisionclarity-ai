@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, ArrowRight, Loader2, Sparkles } from 'lucide-react';
-
+import { FormattedText } from '@/components/FormattedText';
 interface StepScenariosProps {
   decision: Decision;
   onUpdate: (updates: Partial<Decision>) => Promise<boolean>;
@@ -148,9 +148,7 @@ export const StepScenarios = ({ decision, onUpdate, onNext }: StepScenariosProps
                   <Sparkles className="h-5 w-5" />
                   <h3 className="font-semibold">Scenario Analysis</h3>
                 </div>
-                <div className="prose prose-sm max-w-none text-foreground">
-                  <p className="whitespace-pre-wrap leading-relaxed">{analysis}</p>
-                </div>
+                <FormattedText content={analysis} />
                 <Button onClick={handleContinue} className="w-full gap-2">
                   Continue to Bias Check
                   <ArrowRight className="h-4 w-4" />

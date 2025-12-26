@@ -122,7 +122,7 @@ const Dashboard = () => {
                 <p className="text-sm text-foreground">
                   {pendingReflections.length} decision{pendingReflections.length > 1 ? 's' : ''} ready for reflection.{' '}
                   <button 
-                    onClick={() => navigate(`/decision/${pendingReflections[0].id}/reflect`)}
+                    onClick={() => navigate(`/reflect/${pendingReflections[0].id}`)}
                     className="text-primary underline underline-offset-2"
                   >
                     Start reflection

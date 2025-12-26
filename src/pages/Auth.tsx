@@ -72,7 +72,7 @@ const Auth = () => {
         if (error) throw error;
         navigate('/dashboard');
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { data: signUpData, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -80,9 +80,21 @@ const Auth = () => {
           },
         });
         if (error) throw error;
+
+        // Send welcome email
+        if (signUpData.user) {
+          try {
+            await supabase.functions.invoke('send-welcome-email', {
+              body: { email, userId: signUpData.user.id },
+            });
+          } catch (emailError) {
+            console.error('Failed to send welcome email:', emailError);
+          }
+        }
+
         toast({
           title: 'Account created',
-          description: 'You can now start making decisions.',
+          description: 'Check your email for a welcome message.',
         });
         navigate('/dashboard');
       }

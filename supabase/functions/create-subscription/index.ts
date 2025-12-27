@@ -7,11 +7,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Price IDs for subscription tiers
-const PRICE_IDS = {
-  monthly: "price_clarity_monthly", // £15/month - to be created in Stripe
-};
-
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[CREATE-SUBSCRIPTION] ${step}${detailsStr}`);
@@ -41,6 +36,14 @@ serve(async (req) => {
     
     logStep("User authenticated", { userId: user.id, email: user.email });
 
+    const { priceId } = await req.json();
+    
+    if (!priceId) {
+      throw new Error("Price ID is required");
+    }
+
+    logStep("Price ID received", { priceId });
+
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
     });
@@ -60,13 +63,16 @@ serve(async (req) => {
       customer_email: customerId ? undefined : user.email,
       line_items: [
         {
-          price: PRICE_IDS.monthly,
+          price: priceId,
           quantity: 1,
         },
       ],
       mode: "subscription",
       success_url: `${req.headers.get("origin")}/dashboard?subscription=success`,
-      cancel_url: `${req.headers.get("origin")}/dashboard?subscription=cancelled`,
+      cancel_url: `${req.headers.get("origin")}/pricing?subscription=cancelled`,
+      metadata: {
+        user_id: user.id,
+      },
     });
 
     logStep("Checkout session created", { sessionId: session.id });

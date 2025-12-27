@@ -85,7 +85,7 @@ const Auth = () => {
         if (signUpData.user) {
           try {
             await supabase.functions.invoke('send-welcome-email', {
-              body: { email, userId: signUpData.user.id },
+              body: { email, appUrl: window.location.origin },
             });
           } catch (emailError) {
             console.error('Failed to send welcome email:', emailError);
@@ -94,7 +94,7 @@ const Auth = () => {
 
         toast({
           title: 'Account created',
-          description: 'Check your email for a welcome message.',
+          description: 'Welcome to Clarity! Check your email for a welcome message.',
         });
         navigate('/dashboard');
       }

@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, LogOut, Calendar, CheckCircle, Clock, Loader2, GitCompare, Brain, Settings } from 'lucide-react';
+import { Plus, LogOut, Calendar, CheckCircle, Clock, Loader2, GitCompare, Brain, Settings, CreditCard, Shield } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import { DECISION_CATEGORIES } from '@/types/decision';
+import { useToast } from '@/hooks/use-toast';
 
 interface Decision {
   id: string;
@@ -21,17 +22,31 @@ interface Decision {
 }
 
 const Dashboard = () => {
-  const { user, loading: authLoading, signOut, hasPaid, subscriptionTier } = useAuth();
+  const { user, loading: authLoading, signOut, hasPaid, subscriptionTier, isAdmin, checkPaymentStatus } = useAuth();
   const [decisions, setDecisions] = useState<Decision[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!authLoading && !user) {
       navigate('/auth');
     }
   }, [user, authLoading, navigate]);
+
+  useEffect(() => {
+    // Check for subscription success
+    const subscriptionStatus = searchParams.get('subscription');
+    if (subscriptionStatus === 'success') {
+      toast({
+        title: 'Subscription activated!',
+        description: 'Welcome to Clarity Pro. Enjoy unlimited decisions and advanced features.',
+      });
+      checkPaymentStatus();
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchDecisions = async () => {
@@ -92,13 +107,25 @@ const Dashboard = () => {
           <div className="flex items-center gap-2">
             {hasPaid && (
               <Badge variant="secondary" className="text-xs">
-                {subscriptionTier === 'lifetime' ? 'Lifetime' : 'Premium'}
+                {subscriptionTier === 'lifetime' ? 'Lifetime' : 'Pro'}
               </Badge>
+            )}
+            {isAdmin && (
+              <Button variant="ghost" size="sm" onClick={() => navigate('/admin')}>
+                <Shield className="h-4 w-4 mr-2" />
+                Admin
+              </Button>
             )}
             <Button variant="ghost" size="sm" onClick={() => navigate('/profile')}>
               <Brain className="h-4 w-4 mr-2" />
               Insights
             </Button>
+            {!hasPaid && (
+              <Button variant="ghost" size="sm" onClick={() => navigate('/pricing')}>
+                <CreditCard className="h-4 w-4 mr-2" />
+                Upgrade
+              </Button>
+            )}
             <Button variant="ghost" size="sm" onClick={handleSignOut}>
               <LogOut className="h-4 w-4 mr-2" />
               Sign out

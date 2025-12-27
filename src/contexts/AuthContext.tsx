@@ -9,6 +9,7 @@ interface AuthContextType {
   hasPaid: boolean;
   hasSubscription: boolean;
   subscriptionTier: 'free' | 'premium' | 'lifetime';
+  isAdmin: boolean;
   checkPaymentStatus: () => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -30,6 +31,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [hasPaid, setHasPaid] = useState(false);
   const [hasSubscription, setHasSubscription] = useState(false);
   const [subscriptionTier, setSubscriptionTier] = useState<'free' | 'premium' | 'lifetime'>('free');
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  const checkAdminStatus = async (userId: string) => {
+    try {
+      const { data } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .eq('role', 'admin')
+        .maybeSingle();
+      
+      setIsAdmin(!!data);
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+      setIsAdmin(false);
+    }
+  };
 
   const checkPaymentStatus = async () => {
     if (!session) return;
@@ -46,8 +64,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { data: subData, error: subError } = await supabase.functions.invoke('check-subscription');
       if (!subError) {
         setHasSubscription(subData?.subscribed || false);
-        if (subData?.tier) {
-          setSubscriptionTier(subData.tier as 'free' | 'premium' | 'lifetime');
+        if (subData?.subscribed) {
+          setSubscriptionTier('premium');
         }
         if (subData?.hasLifetimeAccess) {
           setHasPaid(true);
@@ -66,6 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setHasPaid(false);
     setHasSubscription(false);
     setSubscriptionTier('free');
+    setIsAdmin(false);
   };
 
   useEffect(() => {
@@ -78,6 +97,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (session?.user) {
           setTimeout(() => {
             checkPaymentStatus();
+            checkAdminStatus(session.user.id);
           }, 0);
         }
       }
@@ -91,6 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (session?.user) {
         setTimeout(() => {
           checkPaymentStatus();
+          checkAdminStatus(session.user.id);
         }, 0);
       }
     });
@@ -108,6 +129,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       hasPaid: hasAccess, 
       hasSubscription,
       subscriptionTier,
+      isAdmin,
       checkPaymentStatus,
       signOut 
     }}>

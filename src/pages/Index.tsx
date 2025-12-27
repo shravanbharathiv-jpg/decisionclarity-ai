@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Brain, Shield, Sparkles, Lock } from 'lucide-react';
+import { ArrowRight, Brain, Shield, Sparkles, Lock, TrendingUp, Clock, Target, Zap } from 'lucide-react';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -16,9 +16,14 @@ const Index = () => {
       <header className="border-b border-border/50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <h1 className="text-xl font-semibold text-foreground">Clarity</h1>
-          <Button variant="ghost" onClick={() => navigate('/auth')}>
-            {user ? 'Dashboard' : 'Sign in'}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" onClick={() => navigate('/pricing')}>
+              Pricing
+            </Button>
+            <Button variant="ghost" onClick={() => navigate(user ? '/dashboard' : '/auth')}>
+              {user ? 'Dashboard' : 'Sign in'}
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -31,14 +36,17 @@ const Index = () => {
             A structured system for working through life's important choices. 
             AI-powered analysis helps you see clearly and decide confidently.
           </p>
-          <div className="mt-10">
+          <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" onClick={handleGetStarted} className="gap-2">
               Start your first decision
               <ArrowRight className="h-4 w-4" />
             </Button>
+            <Button size="lg" variant="outline" onClick={() => navigate('/pricing')}>
+              View pricing
+            </Button>
           </div>
           <p className="mt-4 text-sm text-muted-foreground">
-            £39 one-time payment • Lifetime access
+            Free to try • Pro from $15/month
           </p>
         </section>
 
@@ -64,14 +72,53 @@ const Index = () => {
           </div>
         </section>
 
-        <section className="container mx-auto px-4 py-20 text-center max-w-2xl">
-          <h3 className="text-2xl font-semibold mb-4">One good decision pays for this forever</h3>
-          <p className="text-muted-foreground mb-8">
-            Stop second-guessing. Stop losing sleep. Get the clarity you need to move forward.
-          </p>
-          <Button size="lg" onClick={handleGetStarted}>
-            Get started now
-          </Button>
+        <section className="container mx-auto px-4 py-20 max-w-5xl">
+          <h3 className="text-2xl font-semibold text-center mb-12">Why Clarity works</h3>
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              { 
+                icon: TrendingUp, 
+                title: 'Second-Order Thinking', 
+                description: 'See beyond immediate consequences. Understand the ripple effects of every choice.' 
+              },
+              { 
+                icon: Target, 
+                title: 'Bias Detection', 
+                description: 'AI analyzes your reasoning to identify cognitive biases you might not notice.' 
+              },
+              { 
+                icon: Clock, 
+                title: 'Long-Term Reflections', 
+                description: 'Revisit decisions at 30, 90, and 180 days to learn from outcomes.' 
+              },
+            ].map((feature, index) => (
+              <div key={index} className="p-6 rounded-lg border border-border/50 bg-card">
+                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                  <feature.icon className="h-5 w-5 text-primary" />
+                </div>
+                <h4 className="font-medium mb-2">{feature.title}</h4>
+                <p className="text-sm text-muted-foreground">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="bg-primary/5 py-20">
+          <div className="container mx-auto px-4 text-center max-w-2xl">
+            <Zap className="h-12 w-12 text-primary mx-auto mb-6" />
+            <h3 className="text-2xl font-semibold mb-4">One good decision pays for this forever</h3>
+            <p className="text-muted-foreground mb-8">
+              Stop second-guessing. Stop losing sleep. Get the clarity you need to move forward.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" onClick={handleGetStarted}>
+                Get started now
+              </Button>
+              <Button size="lg" variant="outline" onClick={() => navigate('/pricing')}>
+                See pricing plans
+              </Button>
+            </div>
+          </div>
         </section>
       </main>
 

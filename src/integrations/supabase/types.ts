@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      advisor_comments: {
+        Row: {
+          advisor_name: string
+          comment: string
+          created_at: string
+          decision_id: string
+          id: string
+          share_id: string
+        }
+        Insert: {
+          advisor_name: string
+          comment: string
+          created_at?: string
+          decision_id: string
+          id?: string
+          share_id: string
+        }
+        Update: {
+          advisor_name?: string
+          comment?: string
+          created_at?: string
+          decision_id?: string
+          id?: string
+          share_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "advisor_comments_decision_id_fkey"
+            columns: ["decision_id"]
+            isOneToOne: false
+            referencedRelation: "decisions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "advisor_comments_share_id_fkey"
+            columns: ["share_id"]
+            isOneToOne: false
+            referencedRelation: "decision_shares"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bias_profiles: {
         Row: {
           ai_profile_summary: string | null
@@ -129,6 +171,100 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "decision_reflections_decision_id_fkey"
+            columns: ["decision_id"]
+            isOneToOne: false
+            referencedRelation: "decisions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      decision_scores: {
+        Row: {
+          ai_score_explanation: string | null
+          analysis_depth_score: number | null
+          bias_score: number | null
+          clarity_score: number | null
+          created_at: string
+          decision_id: string
+          id: string
+          overall_score: number | null
+          reversibility_score: number | null
+          updated_at: string
+        }
+        Insert: {
+          ai_score_explanation?: string | null
+          analysis_depth_score?: number | null
+          bias_score?: number | null
+          clarity_score?: number | null
+          created_at?: string
+          decision_id: string
+          id?: string
+          overall_score?: number | null
+          reversibility_score?: number | null
+          updated_at?: string
+        }
+        Update: {
+          ai_score_explanation?: string | null
+          analysis_depth_score?: number | null
+          bias_score?: number | null
+          clarity_score?: number | null
+          created_at?: string
+          decision_id?: string
+          id?: string
+          overall_score?: number | null
+          reversibility_score?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "decision_scores_decision_id_fkey"
+            columns: ["decision_id"]
+            isOneToOne: true
+            referencedRelation: "decisions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      decision_shares: {
+        Row: {
+          advisor_email: string
+          advisor_name: string | null
+          can_comment: boolean | null
+          created_at: string
+          decision_id: string
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          share_token: string
+          shared_by: string
+        }
+        Insert: {
+          advisor_email: string
+          advisor_name?: string | null
+          can_comment?: boolean | null
+          created_at?: string
+          decision_id: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          share_token?: string
+          shared_by: string
+        }
+        Update: {
+          advisor_email?: string
+          advisor_name?: string | null
+          can_comment?: boolean | null
+          created_at?: string
+          decision_id?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          share_token?: string
+          shared_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "decision_shares_decision_id_fkey"
             columns: ["decision_id"]
             isOneToOne: false
             referencedRelation: "decisions"

@@ -24,6 +24,9 @@ export const useAuth = () => {
   return context;
 };
 
+// Admin email that gets free pro access
+const ADMIN_EMAIL = 'shravanbvidhya@gmail.com';
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -33,8 +36,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [subscriptionTier, setSubscriptionTier] = useState<'free' | 'premium' | 'lifetime'>('free');
   const [isAdmin, setIsAdmin] = useState(false);
 
-  const checkAdminStatus = async (userId: string) => {
+  const checkAdminStatus = async (userId: string, email: string | undefined) => {
     try {
+      // Check if user is the admin email - they get free pro access
+      if (email === ADMIN_EMAIL) {
+        setIsAdmin(true);
+        setHasPaid(true);
+        setSubscriptionTier('lifetime');
+        return true;
+      }
+
       const { data } = await supabase
         .from('user_roles')
         .select('role')
@@ -42,10 +53,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq('role', 'admin')
         .maybeSingle();
       
-      setIsAdmin(!!data);
+      const adminStatus = !!data;
+      setIsAdmin(adminStatus);
+      
+      // Admins get free pro access
+      if (adminStatus) {
+        setHasPaid(true);
+        setSubscriptionTier('lifetime');
+      }
+      
+      return adminStatus;
     } catch (error) {
       console.error('Error checking admin status:', error);
       setIsAdmin(false);
+      return false;
     }
   };
 
@@ -58,6 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!paymentError && paymentData?.hasPaid) {
         setHasPaid(true);
         setSubscriptionTier('lifetime');
+        return;
       }
 
       // Check subscription
@@ -65,6 +87,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!subError) {
         setHasSubscription(subData?.subscribed || false);
         if (subData?.subscribed) {
+          setHasPaid(true);
           setSubscriptionTier('premium');
         }
         if (subData?.hasLifetimeAccess) {
@@ -95,9 +118,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setLoading(false);
 
         if (session?.user) {
-          setTimeout(() => {
-            checkPaymentStatus();
-            checkAdminStatus(session.user.id);
+          setTimeout(async () => {
+            const isAdminUser = await checkAdminStatus(session.user.id, session.user.email);
+            // Only check payment if not admin (admin already has access)
+            if (!isAdminUser) {
+              checkPaymentStatus();
+            }
           }, 0);
         }
       }
@@ -109,9 +135,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
       
       if (session?.user) {
-        setTimeout(() => {
-          checkPaymentStatus();
-          checkAdminStatus(session.user.id);
+        setTimeout(async () => {
+          const isAdminUser = await checkAdminStatus(session.user.id, session.user.email);
+          // Only check payment if not admin (admin already has access)
+          if (!isAdminUser) {
+            checkPaymentStatus();
+          }
         }, 0);
       }
     });
@@ -119,7 +148,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
-  const hasAccess = hasPaid || hasSubscription || subscriptionTier !== 'free';
+  const hasAccess = hasPaid || hasSubscription || subscriptionTier !== 'free' || isAdmin;
 
   return (
     <AuthContext.Provider value={{ 

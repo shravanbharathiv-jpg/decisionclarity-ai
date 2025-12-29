@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import {
@@ -8,8 +10,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, CreditCard, Check, Shield } from 'lucide-react';
+import { Loader2, Check, Shield, Sparkles, Crown, BarChart3, Users, Brain, Lock } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface PaywallModalProps {
   open: boolean;
@@ -17,19 +21,31 @@ interface PaywallModalProps {
   onPaymentComplete: () => void;
 }
 
+const PRICING: Record<string, { price: string; period: string; priceId: string; savings?: string }> = {
+  monthly: { price: '£9.99', period: '/month', priceId: 'price_1SjfrMHXuJ6GDDWi0ppujkcu' },
+  yearly: { price: '£69.99', period: '/year', priceId: 'price_1SjfrSHXuJ6GDDWiWcRS1Vg3', savings: 'Save 42%' },
+  lifetime: { price: '£99.99', period: 'one-time', priceId: 'price_1SjfrUHXuJ6GDDWi0krEVPGU', savings: 'Best Value' },
+};
+
 export const PaywallModal = ({ open, onClose, onPaymentComplete }: PaywallModalProps) => {
   const [loading, setLoading] = useState(false);
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly' | 'lifetime'>('yearly');
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleCheckout = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('create-payment');
+      const priceId = PRICING[billingCycle].priceId;
+      const functionName = billingCycle === 'lifetime' ? 'create-payment' : 'create-subscription';
+      
+      const { data, error } = await supabase.functions.invoke(functionName, {
+        body: { priceId },
+      });
       
       if (error) throw error;
       
       if (data?.url) {
-        // Open Stripe checkout in new tab
         window.open(data.url, '_blank');
         onPaymentComplete();
       }
@@ -46,34 +62,61 @@ export const PaywallModal = ({ open, onClose, onPaymentComplete }: PaywallModalP
   };
 
   const features = [
-    'AI-powered decision insights',
-    'Cognitive bias detection',
-    'Scenario analysis',
-    'Permanent decision records',
-    'Lifetime access',
+    { icon: Sparkles, text: 'Scenario modeling (best/worst/likely)' },
+    { icon: Brain, text: 'AI-powered bias detection' },
+    { icon: BarChart3, text: 'Decision quality scoring (0-100)' },
+    { icon: Users, text: 'Share with trusted advisors' },
+    { icon: Crown, text: 'Decision templates library' },
   ];
+
+  const currentPricing = PRICING[billingCycle];
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader className="text-center">
+          <div className="mx-auto mb-2">
+            <Badge className="bg-primary/10 text-primary border-0">
+              <Lock className="h-3 w-3 mr-1" />
+              Premium Feature
+            </Badge>
+          </div>
           <DialogTitle className="text-2xl">Unlock Full Access</DialogTitle>
           <DialogDescription className="text-base">
-            Complete your decision with AI-powered insights
+            Continue with AI-powered scenario modeling and more
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
+          {/* Billing toggle */}
+          <Tabs value={billingCycle} onValueChange={(v) => setBillingCycle(v as any)} className="w-full">
+            <TabsList className="grid grid-cols-3 w-full">
+              <TabsTrigger value="monthly" className="text-xs">Monthly</TabsTrigger>
+              <TabsTrigger value="yearly" className="text-xs relative">
+                Yearly
+                <span className="absolute -top-2 -right-1 text-[8px] bg-green-500 text-white px-1 rounded">-42%</span>
+              </TabsTrigger>
+              <TabsTrigger value="lifetime" className="text-xs">Lifetime</TabsTrigger>
+            </TabsList>
+          </Tabs>
+
           <div className="text-center">
-            <div className="text-4xl font-bold text-foreground">£39</div>
-            <p className="text-sm text-muted-foreground mt-1">One-time payment • Lifetime access</p>
+            <div className="text-4xl font-bold text-foreground">{currentPricing.price}</div>
+            <p className="text-sm text-muted-foreground mt-1">
+              {currentPricing.period === 'one-time' ? 'One-time payment • Own forever' : `per ${currentPricing.period.replace('/', '')}`}
+            </p>
+            {currentPricing.savings && (
+              <Badge variant="secondary" className="mt-2 bg-green-500/10 text-green-600">
+                {currentPricing.savings}
+              </Badge>
+            )}
           </div>
 
           <ul className="space-y-3">
             {features.map((feature, index) => (
               <li key={index} className="flex items-center gap-3 text-sm">
-                <Check className="h-5 w-5 text-primary flex-shrink-0" />
-                <span>{feature}</span>
+                <feature.icon className="h-4 w-4 text-primary flex-shrink-0" />
+                <span>{feature.text}</span>
               </li>
             ))}
           </ul>
@@ -88,15 +131,15 @@ export const PaywallModal = ({ open, onClose, onPaymentComplete }: PaywallModalP
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <>
-                <CreditCard className="h-4 w-4" />
-                Continue to payment
+                <Sparkles className="h-4 w-4" />
+                Upgrade to Pro
               </>
             )}
           </Button>
 
           <p className="text-xs text-center text-muted-foreground flex items-center justify-center gap-1">
             <Shield className="h-3 w-3" />
-            Secure payment via Stripe
+            7-day money-back guarantee • Secure payment via Stripe
           </p>
         </div>
       </DialogContent>

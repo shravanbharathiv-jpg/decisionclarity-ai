@@ -5,21 +5,25 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Check, Loader2, ArrowLeft, Sparkles, Zap, Crown } from 'lucide-react';
+import { Check, Loader2, ArrowLeft, Sparkles, Zap, Crown, X, BarChart3, Users, Brain, TrendingUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const PLANS = [
   {
     id: 'free',
     name: 'Free',
-    price: '$0',
+    price: '£0',
     period: 'forever',
-    description: 'Perfect for trying Clarity',
+    description: 'Try the basics',
     features: [
-      '3 decisions per month',
-      'Basic AI insights',
-      'Bias detection',
-      'Scenario modeling',
+      { text: 'Basic decision deconstruction', included: true },
+      { text: '3 decisions per month', included: true },
+      { text: 'Scenario modeling', included: false },
+      { text: 'AI bias detection', included: false },
+      { text: 'Second-order thinking', included: false },
+      { text: 'AI decision scoring', included: false },
+      { text: 'Decision templates', included: false },
+      { text: 'Advisor sharing', included: false },
     ],
     icon: Zap,
     popular: false,
@@ -27,18 +31,19 @@ const PLANS = [
   {
     id: 'monthly',
     name: 'Pro Monthly',
-    price: '$15',
+    price: '£9.99',
     period: '/month',
     description: 'For serious decision makers',
-    priceId: 'price_1Sj65jHXuJ6GDDWiUuZKjNV6',
+    priceId: 'price_1SjfrMHXuJ6GDDWi0ppujkcu',
     features: [
-      'Unlimited decisions',
-      'Advanced AI analysis',
-      'Second-order thinking',
-      'Decision comparisons',
-      'Bias profile & patterns',
-      '30/90/180 day reflections',
-      'Priority support',
+      { text: 'Everything in Free', included: true },
+      { text: 'Unlimited decisions', included: true },
+      { text: 'Scenario modeling', included: true },
+      { text: 'AI bias detection', included: true },
+      { text: 'Second-order thinking', included: true },
+      { text: 'AI decision scoring', included: true },
+      { text: 'Decision templates', included: true },
+      { text: 'Advisor sharing', included: true },
     ],
     icon: Sparkles,
     popular: true,
@@ -46,18 +51,36 @@ const PLANS = [
   {
     id: 'yearly',
     name: 'Pro Yearly',
-    price: '$120',
+    price: '£69.99',
     period: '/year',
-    description: 'Save 33% - Best value',
-    priceId: 'price_1Sj66VHXuJ6GDDWieTzYLN2Z',
+    description: 'Save 42% — Best for commitment',
+    priceId: 'price_1SjfrSHXuJ6GDDWiWcRS1Vg3',
     features: [
-      'Everything in Pro Monthly',
-      '4 months free',
-      'Early access to new features',
-      'Founding member badge',
+      { text: 'Everything in Pro Monthly', included: true },
+      { text: '5 months free', included: true },
+      { text: 'Early access to new features', included: true },
+      { text: 'Founding member badge', included: true },
     ],
     icon: Crown,
     popular: false,
+    savings: 'Save 42%',
+  },
+  {
+    id: 'lifetime',
+    name: 'Lifetime',
+    price: '£99.99',
+    period: 'one-time',
+    description: 'Pay once, own forever',
+    priceId: 'price_1SjfrUHXuJ6GDDWi0krEVPGU',
+    features: [
+      { text: 'Everything in Pro', included: true },
+      { text: 'No recurring payments ever', included: true },
+      { text: 'All future features included', included: true },
+      { text: 'Lifetime founding member status', included: true },
+    ],
+    icon: Crown,
+    popular: false,
+    savings: 'Best Value',
   },
 ];
 
@@ -76,7 +99,9 @@ const Pricing = () => {
     setLoading(planId);
 
     try {
-      const { data, error } = await supabase.functions.invoke('create-subscription', {
+      const functionName = planId === 'lifetime' ? 'create-payment' : 'create-subscription';
+      
+      const { data, error } = await supabase.functions.invoke(functionName, {
         body: { priceId },
       });
 
@@ -126,13 +151,13 @@ const Pricing = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-12 max-w-5xl">
-        <div className="text-center space-y-4 mb-12">
+      <main className="container mx-auto px-4 py-12 max-w-6xl">
+        <div className="text-center space-y-4 mb-8">
           <h1 className="text-4xl font-semibold text-foreground tracking-tight">
-            Simple, Transparent Pricing
+            Choose Your Clarity Plan
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Choose the plan that fits your decision-making needs. Cancel anytime.
+            One good decision can pay for this forever. Cancel anytime.
           </p>
           {hasPaid && (
             <Badge variant="secondary" className="text-sm">
@@ -141,7 +166,23 @@ const Pricing = () => {
           )}
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        {/* Feature highlights */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 max-w-3xl mx-auto">
+          {[
+            { icon: Sparkles, label: 'Scenario Modeling', desc: 'Best/worst/likely' },
+            { icon: Brain, label: 'Bias Detection', desc: 'AI-powered' },
+            { icon: BarChart3, label: 'Decision Scoring', desc: '0-100 quality score' },
+            { icon: Users, label: 'Advisor Sharing', desc: 'Get trusted input' },
+          ].map((item, i) => (
+            <div key={i} className="text-center p-4 rounded-lg bg-muted/30">
+              <item.icon className="h-6 w-6 text-primary mx-auto mb-2" />
+              <p className="text-sm font-medium">{item.label}</p>
+              <p className="text-xs text-muted-foreground">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {PLANS.map((plan) => {
             const Icon = plan.icon;
             const isCurrentPlan = 
@@ -158,25 +199,38 @@ const Pricing = () => {
                     <Badge className="bg-primary text-primary-foreground">Most Popular</Badge>
                   </div>
                 )}
+                {plan.savings && (
+                  <div className="absolute -top-3 right-4">
+                    <Badge variant="secondary" className="bg-green-500/10 text-green-600 border-green-500/20">
+                      {plan.savings}
+                    </Badge>
+                  </div>
+                )}
                 
                 <CardHeader className="text-center pb-4">
-                  <div className="mx-auto mb-4 p-3 rounded-full bg-primary/10">
-                    <Icon className="h-6 w-6 text-primary" />
+                  <div className="mx-auto mb-3 p-2 rounded-full bg-primary/10 w-fit">
+                    <Icon className="h-5 w-5 text-primary" />
                   </div>
-                  <CardTitle className="text-xl">{plan.name}</CardTitle>
-                  <CardDescription>{plan.description}</CardDescription>
-                  <div className="pt-4">
-                    <span className="text-4xl font-bold text-foreground">{plan.price}</span>
-                    <span className="text-muted-foreground">{plan.period}</span>
+                  <CardTitle className="text-lg">{plan.name}</CardTitle>
+                  <CardDescription className="text-xs">{plan.description}</CardDescription>
+                  <div className="pt-3">
+                    <span className="text-3xl font-bold text-foreground">{plan.price}</span>
+                    <span className="text-muted-foreground text-sm">{plan.period !== 'forever' && plan.period !== 'one-time' ? plan.period : ` ${plan.period}`}</span>
                   </div>
                 </CardHeader>
                 
-                <CardContent className="space-y-6">
-                  <ul className="space-y-3">
+                <CardContent className="space-y-4">
+                  <ul className="space-y-2">
                     {plan.features.map((feature, i) => (
                       <li key={i} className="flex items-start gap-2">
-                        <Check className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                        <span className="text-sm text-muted-foreground">{feature}</span>
+                        {feature.included ? (
+                          <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                        ) : (
+                          <X className="h-4 w-4 text-muted-foreground/40 shrink-0 mt-0.5" />
+                        )}
+                        <span className={`text-xs ${feature.included ? 'text-muted-foreground' : 'text-muted-foreground/40'}`}>
+                          {feature.text}
+                        </span>
                       </li>
                     ))}
                   </ul>
@@ -197,16 +251,17 @@ const Pricing = () => {
                       disabled={loading === 'manage'}
                     >
                       {loading === 'manage' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Manage Subscription
+                      Manage
                     </Button>
                   ) : (
                     <Button 
                       className="w-full"
+                      variant={plan.popular ? 'default' : 'outline'}
                       onClick={() => handleSubscribe(plan.priceId!, plan.id)}
                       disabled={loading === plan.id || hasPaid}
                     >
                       {loading === plan.id && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      {hasPaid ? 'Already Subscribed' : 'Subscribe'}
+                      {hasPaid ? 'Current' : 'Upgrade'}
                     </Button>
                   )}
                 </CardContent>
@@ -215,12 +270,12 @@ const Pricing = () => {
           })}
         </div>
 
-        <div className="mt-12 text-center space-y-4">
+        <div className="mt-12 text-center space-y-3">
           <p className="text-sm text-muted-foreground">
-            All plans include a 7-day money-back guarantee. No questions asked.
+            ✓ 7-day money-back guarantee • ✓ Cancel anytime • ✓ Secure payment via Stripe
           </p>
-          <p className="text-sm text-muted-foreground">
-            Secure payment powered by Stripe. Your data is always protected.
+          <p className="text-xs text-muted-foreground">
+            Questions? Contact support@clarity-app.com
           </p>
         </div>
       </main>

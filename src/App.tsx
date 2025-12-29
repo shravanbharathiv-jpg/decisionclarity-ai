@@ -15,6 +15,8 @@ import Compare from "./pages/Compare";
 import Reflect from "./pages/Reflect";
 import Pricing from "./pages/Pricing";
 import Admin from "./pages/Admin";
+import Onboarding from "./pages/Onboarding";
+import Upgrade from "./pages/Upgrade";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +31,8 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/upgrade" element={<Upgrade />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/decision/new" element={<NewDecision />} />
             <Route path="/decision/:id" element={<DecisionFlow />} />

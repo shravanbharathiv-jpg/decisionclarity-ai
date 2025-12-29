@@ -91,8 +91,9 @@ const DecisionFlow = () => {
   const handleNextStep = async () => {
     if (!decision) return;
     
+    // Free users can only access step 2 (deconstruction). Scenario modeling (step 3+) requires Pro
     if (decision.current_step >= 2 && !hasPaid) {
-      setShowPaywall(true);
+      navigate('/upgrade');
       return;
     }
 

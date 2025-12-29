@@ -46,7 +46,7 @@ const Index = () => {
             </Button>
           </div>
           <p className="mt-4 text-sm text-muted-foreground">
-            Free to try • Pro from $15/month
+            Free to try • Pro from £9.99/month
           </p>
         </section>
 

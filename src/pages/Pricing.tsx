@@ -46,7 +46,7 @@ const PLANS = [
       { text: 'Advisor sharing', included: true },
     ],
     icon: Sparkles,
-    popular: true,
+    popular: false,
   },
   {
     id: 'yearly',
@@ -79,7 +79,7 @@ const PLANS = [
       { text: 'Lifetime founding member status', included: true },
     ],
     icon: Crown,
-    popular: false,
+    popular: true,
     savings: 'Best Value',
   },
 ];

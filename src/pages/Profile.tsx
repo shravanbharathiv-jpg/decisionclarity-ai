@@ -4,7 +4,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Brain, TrendingUp, AlertTriangle, Loader2, User, CreditCard } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, Brain, TrendingUp, AlertTriangle, Loader2, User, Crown, Zap, Sparkles, Settings } from 'lucide-react';
 import { FormattedText } from '@/components/FormattedText';
 import { useToast } from '@/hooks/use-toast';
 
@@ -19,21 +20,25 @@ interface BiasProfile {
   total_decisions_analyzed: number | null;
 }
 
-interface Profile {
+interface ProfileData {
   email: string;
   subscription_tier: string | null;
   subscription_status: string | null;
+  subscription_end_date: string | null;
   decisions_used_this_month: number | null;
+  stripe_payment_status: string | null;
 }
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, subscriptionTier, hasPaid, isAdmin, checkPaymentStatus } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [biasProfile, setBiasProfile] = useState<BiasProfile | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profile, setProfile] = useState<ProfileData | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [decisionsThisMonth, setDecisionsThisMonth] = useState(0);
+  const [totalDecisions, setTotalDecisions] = useState(0);
 
   useEffect(() => {
     if (!user) {
@@ -45,9 +50,11 @@ const Profile = () => {
 
   const fetchData = async () => {
     try {
-      const [biasRes, profileRes] = await Promise.all([
+      // Fetch all data in parallel
+      const [biasRes, profileRes, decisionsRes] = await Promise.all([
         supabase.from('bias_profiles').select('*').eq('user_id', user!.id).single(),
-        supabase.from('profiles').select('email, subscription_tier, subscription_status, decisions_used_this_month').eq('user_id', user!.id).single()
+        supabase.from('profiles').select('*').eq('user_id', user!.id).single(),
+        supabase.from('decisions').select('id, created_at, status').eq('user_id', user!.id)
       ]);
 
       if (biasRes.data) {
@@ -56,6 +63,20 @@ const Profile = () => {
       if (profileRes.data) {
         setProfile(profileRes.data);
       }
+      
+      // Calculate decisions this month
+      if (decisionsRes.data) {
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const thisMonthDecisions = decisionsRes.data.filter(d => 
+          new Date(d.created_at) >= startOfMonth
+        ).length;
+        setDecisionsThisMonth(thisMonthDecisions);
+        setTotalDecisions(decisionsRes.data.length);
+      }
+
+      // Also refresh payment status from Stripe
+      await checkPaymentStatus();
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
@@ -66,7 +87,6 @@ const Profile = () => {
   const analyzeProfile = async () => {
     setAnalyzing(true);
     try {
-      // Fetch all completed decisions for analysis
       const { data: decisions, error } = await supabase
         .from('decisions')
         .select('*')
@@ -101,7 +121,6 @@ const Profile = () => {
 
       if (fnError) throw fnError;
 
-      // Upsert bias profile
       const newProfile = {
         user_id: user!.id,
         common_biases: data.common_biases || [],
@@ -135,6 +154,36 @@ const Profile = () => {
     }
   };
 
+  const getPlanDisplay = () => {
+    if (isAdmin) return { name: 'Admin (Lifetime)', icon: Crown, color: 'text-yellow-500' };
+    if (subscriptionTier === 'lifetime') return { name: 'Lifetime', icon: Crown, color: 'text-yellow-500' };
+    if (subscriptionTier === 'premium' || hasPaid) return { name: 'Pro', icon: Sparkles, color: 'text-primary' };
+    return { name: 'Free', icon: Zap, color: 'text-muted-foreground' };
+  };
+
+  const getStatusDisplay = () => {
+    if (isAdmin) return { text: 'Active (Admin)', color: 'bg-green-500/10 text-green-600' };
+    if (subscriptionTier === 'lifetime') return { text: 'Lifetime Access', color: 'bg-yellow-500/10 text-yellow-600' };
+    if (hasPaid) return { text: 'Active', color: 'bg-green-500/10 text-green-600' };
+    return { text: 'Free Plan', color: 'bg-muted text-muted-foreground' };
+  };
+
+  const handleManageSubscription = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('customer-portal');
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to open subscription management',
+        variant: 'destructive',
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -142,6 +191,10 @@ const Profile = () => {
       </div>
     );
   }
+
+  const plan = getPlanDisplay();
+  const status = getStatusDisplay();
+  const PlanIcon = plan.icon;
 
   return (
     <div className="min-h-screen bg-background">
@@ -177,19 +230,55 @@ const Profile = () => {
             <CardContent className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Email</span>
-                <span className="text-foreground">{profile?.email}</span>
+                <span className="text-foreground">{profile?.email || user?.email}</span>
               </div>
+              
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Plan</span>
-                <span className="text-foreground capitalize">{profile?.subscription_tier || 'Free'}</span>
+                <div className="flex items-center gap-2">
+                  <PlanIcon className={`h-4 w-4 ${plan.color}`} />
+                  <span className="text-foreground font-medium">{plan.name}</span>
+                </div>
               </div>
+              
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Status</span>
-                <span className="text-foreground capitalize">{profile?.subscription_status || 'Inactive'}</span>
+                <Badge className={status.color}>{status.text}</Badge>
               </div>
+              
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Decisions this month</span>
-                <span className="text-foreground">{profile?.decisions_used_this_month || 0}</span>
+                <span className="text-foreground">
+                  {decisionsThisMonth}
+                  {!hasPaid && <span className="text-muted-foreground"> / 3</span>}
+                </span>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Total decisions</span>
+                <span className="text-foreground">{totalDecisions}</span>
+              </div>
+
+              {profile?.subscription_end_date && subscriptionTier === 'premium' && (
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Renews on</span>
+                  <span className="text-foreground">
+                    {new Date(profile.subscription_end_date).toLocaleDateString()}
+                  </span>
+                </div>
+              )}
+
+              <div className="pt-4 flex gap-2">
+                {!hasPaid ? (
+                  <Button onClick={() => navigate('/pricing')} className="flex-1">
+                    Upgrade to Pro
+                  </Button>
+                ) : subscriptionTier !== 'lifetime' && !isAdmin ? (
+                  <Button variant="outline" onClick={handleManageSubscription} className="flex-1">
+                    <Settings className="h-4 w-4 mr-2" />
+                    Manage Subscription
+                  </Button>
+                ) : null}
               </div>
             </CardContent>
           </Card>
@@ -206,7 +295,7 @@ const Profile = () => {
                   variant="outline"
                   size="sm"
                   onClick={analyzeProfile}
-                  disabled={analyzing}
+                  disabled={analyzing || !hasPaid}
                 >
                   {analyzing ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -222,7 +311,15 @@ const Profile = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {biasProfile?.ai_profile_summary ? (
+              {!hasPaid ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Brain className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>Upgrade to Pro to unlock your personalized bias profile.</p>
+                  <Button onClick={() => navigate('/pricing')} variant="outline" className="mt-4">
+                    View Plans
+                  </Button>
+                </div>
+              ) : biasProfile?.ai_profile_summary ? (
                 <>
                   <FormattedText content={biasProfile.ai_profile_summary} />
 

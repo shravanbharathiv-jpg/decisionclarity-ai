@@ -1,7 +1,121 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Groq API keys for fallback
+const GROQ_KEYS = [
+  'GROQ_API_KEY_1',
+  'GROQ_API_KEY_2', 
+  'GROQ_API_KEY_3',
+  'GROQ_API_KEY_4',
+  'GROQ_API_KEY_5',
+];
+
+async function callLovableAI(prompt: string) {
+  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+  if (!LOVABLE_API_KEY) {
+    throw new Error("LOVABLE_API_KEY not configured");
+  }
+
+  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash",
+      messages: [
+        { role: "system", content: "You are a decision quality analyst. Respond only with valid JSON." },
+        { role: "user", content: prompt }
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const status = response.status;
+    if (status === 429 || status === 402 || status === 503) {
+      throw new Error(`LOVABLE_RATE_LIMITED:${status}`);
+    }
+    throw new Error(`Lovable AI error: ${status}`);
+  }
+
+  const data = await response.json();
+  return data.choices?.[0]?.message?.content || "";
+}
+
+async function callGroqAI(prompt: string, keyIndex: number): Promise<string> {
+  const keyName = GROQ_KEYS[keyIndex];
+  const apiKey = Deno.env.get(keyName);
+  
+  if (!apiKey) {
+    throw new Error(`${keyName} not configured`);
+  }
+
+  console.log(`[SCORE-DECISION] Trying Groq key ${keyIndex + 1}/5`);
+
+  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "compound-beta",
+      messages: [
+        { role: "system", content: "You are a decision quality analyst. Respond only with valid JSON." },
+        { role: "user", content: prompt }
+      ],
+      max_tokens: 1024,
+    }),
+  });
+
+  if (!response.ok) {
+    const status = response.status;
+    if (status === 429 || status === 402) {
+      throw new Error(`GROQ_RATE_LIMITED:${keyIndex}`);
+    }
+    throw new Error(`Groq error: ${status}`);
+  }
+
+  const data = await response.json();
+  return data.choices?.[0]?.message?.content || "";
+}
+
+async function getAIResponse(prompt: string): Promise<string> {
+  try {
+    console.log("[SCORE-DECISION] Trying Lovable AI...");
+    const result = await callLovableAI(prompt);
+    console.log("[SCORE-DECISION] Lovable AI succeeded");
+    return result;
+  } catch (error: any) {
+    console.log("[SCORE-DECISION] Lovable AI failed:", error.message);
+    
+    if (error.message?.includes("LOVABLE_RATE_LIMITED")) {
+      console.log("[SCORE-DECISION] Switching to Groq fallback...");
+      
+      for (let i = 0; i < GROQ_KEYS.length; i++) {
+        try {
+          const result = await callGroqAI(prompt, i);
+          console.log(`[SCORE-DECISION] Groq key ${i + 1} succeeded`);
+          return result;
+        } catch (groqError: any) {
+          console.log(`[SCORE-DECISION] Groq key ${i + 1} failed:`, groqError.message);
+          if (!groqError.message?.includes("GROQ_RATE_LIMITED")) {
+            if (i === GROQ_KEYS.length - 1) throw groqError;
+          }
+        }
+      }
+      
+      throw new Error("All AI providers exhausted. Please try again later.");
+    }
+    
+    throw error;
+  }
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -11,11 +125,6 @@ Deno.serve(async (req) => {
   try {
     const { decision } = await req.json();
     
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
-    }
-
     console.log("[SCORE-DECISION] Scoring decision:", decision.title);
 
     const prompt = `Analyze this decision and provide a quality score from 0-100 for each dimension:
@@ -35,43 +144,21 @@ Key Reasons: ${decision.key_reasons || 'Not provided'}
 Score these dimensions (0-100):
 1. overall_score: Overall decision quality
 2. clarity_score: How clearly defined is the decision
-3. bias_score: How well biases were identified and addressed (higher = better awareness)
+3. bias_score: How well biases were identified (higher = better awareness)
 4. reversibility_score: Risk assessment based on reversibility
 5. analysis_depth_score: How thorough was the analysis
 
-Respond ONLY with valid JSON in this format:
+Respond ONLY with valid JSON:
 {
   "overall_score": number,
   "clarity_score": number,
   "bias_score": number,
   "reversibility_score": number,
   "analysis_depth_score": number,
-  "explanation": "2-3 sentence explanation of the scores"
+  "explanation": "2-3 sentence explanation"
 }`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: "You are a decision quality analyst. Respond only with valid JSON." },
-          { role: "user", content: prompt }
-        ],
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("[SCORE-DECISION] AI API error:", response.status, errorText);
-      throw new Error(`Failed to get AI scoring: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content || "";
+    const content = await getAIResponse(prompt);
     
     console.log("[SCORE-DECISION] AI response received");
 

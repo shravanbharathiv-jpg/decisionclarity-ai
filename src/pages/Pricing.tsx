@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Check, Loader2, ArrowLeft, Sparkles, Zap, Crown, X, BarChart3, Users, Brain, TrendingUp } from 'lucide-react';
+import { Check, Loader2, ArrowLeft, Sparkles, Zap, Crown, X, BarChart3, Users, Brain, TrendingUp, Shield } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const PLANS = [
@@ -271,8 +271,12 @@ const Pricing = () => {
         </div>
 
         <div className="mt-12 text-center space-y-3">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 border border-green-500/20">
+            <Shield className="h-4 w-4 text-green-600" />
+            <span className="text-sm font-medium text-green-600">3-Day Money Back Guarantee</span>
+          </div>
           <p className="text-sm text-muted-foreground">
-            ✓ 7-day money-back guarantee • ✓ Cancel anytime • ✓ Secure payment via Stripe
+            ✓ Full refund within 3 days, no questions asked • ✓ Cancel anytime • ✓ Secure payment via Stripe
           </p>
           <p className="text-xs text-muted-foreground">
             Questions? Contact support@clarity-app.com

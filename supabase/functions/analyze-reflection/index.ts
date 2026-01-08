@@ -14,18 +14,128 @@ interface ReflectionRequest {
   whatSurprised?: string;
   whatDifferently?: string;
   reflectionType?: string;
-  // For comparison
   decisions?: Array<{
     title: string;
     description: string;
     finalDecision: string;
     category: string;
   }>;
-  // For second order
   currentContext?: string;
-  // For bias profile
   allBiases?: string[];
   decisionPatterns?: any;
+}
+
+// Groq API keys for fallback
+const GROQ_KEYS = [
+  'GROQ_API_KEY_1',
+  'GROQ_API_KEY_2', 
+  'GROQ_API_KEY_3',
+  'GROQ_API_KEY_4',
+  'GROQ_API_KEY_5',
+];
+
+async function callLovableAI(systemPrompt: string, userPrompt: string) {
+  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+  if (!LOVABLE_API_KEY) {
+    throw new Error("LOVABLE_API_KEY not configured");
+  }
+
+  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const status = response.status;
+    if (status === 429 || status === 402 || status === 503) {
+      throw new Error(`LOVABLE_RATE_LIMITED:${status}`);
+    }
+    throw new Error(`Lovable AI error: ${status}`);
+  }
+
+  const data = await response.json();
+  return data.choices?.[0]?.message?.content || "";
+}
+
+async function callGroqAI(systemPrompt: string, userPrompt: string, keyIndex: number): Promise<string> {
+  const keyName = GROQ_KEYS[keyIndex];
+  const apiKey = Deno.env.get(keyName);
+  
+  if (!apiKey) {
+    throw new Error(`${keyName} not configured`);
+  }
+
+  console.log(`[ANALYZE-REFLECTION] Trying Groq key ${keyIndex + 1}/5`);
+
+  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "compound-beta",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      max_tokens: 2048,
+    }),
+  });
+
+  if (!response.ok) {
+    const status = response.status;
+    if (status === 429 || status === 402) {
+      throw new Error(`GROQ_RATE_LIMITED:${keyIndex}`);
+    }
+    const errorText = await response.text();
+    throw new Error(`Groq error: ${status} - ${errorText}`);
+  }
+
+  const data = await response.json();
+  return data.choices?.[0]?.message?.content || "";
+}
+
+async function getAIResponse(systemPrompt: string, userPrompt: string): Promise<string> {
+  try {
+    console.log("[ANALYZE-REFLECTION] Trying Lovable AI...");
+    const result = await callLovableAI(systemPrompt, userPrompt);
+    console.log("[ANALYZE-REFLECTION] Lovable AI succeeded");
+    return result;
+  } catch (error: any) {
+    console.log("[ANALYZE-REFLECTION] Lovable AI failed:", error.message);
+    
+    if (error.message?.includes("LOVABLE_RATE_LIMITED")) {
+      console.log("[ANALYZE-REFLECTION] Switching to Groq fallback...");
+      
+      for (let i = 0; i < GROQ_KEYS.length; i++) {
+        try {
+          const result = await callGroqAI(systemPrompt, userPrompt, i);
+          console.log(`[ANALYZE-REFLECTION] Groq key ${i + 1} succeeded`);
+          return result;
+        } catch (groqError: any) {
+          console.log(`[ANALYZE-REFLECTION] Groq key ${i + 1} failed:`, groqError.message);
+          if (!groqError.message?.includes("GROQ_RATE_LIMITED")) {
+            if (i === GROQ_KEYS.length - 1) throw groqError;
+          }
+        }
+      }
+      
+      throw new Error("All AI providers exhausted. Please try again later.");
+    }
+    
+    throw error;
+  }
 }
 
 serve(async (req) => {
@@ -34,11 +144,6 @@ serve(async (req) => {
   }
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
-    }
-
     const { type, ...data }: ReflectionRequest = await req.json();
     console.log(`[ANALYZE-REFLECTION] Processing ${type} analysis`);
 
@@ -46,100 +151,63 @@ serve(async (req) => {
     let userPrompt = "";
 
     if (type === 'reflection') {
-      systemPrompt = `You are a thoughtful analyst helping someone reflect on a past decision. Be calm, insightful, and help them extract learning. Do not motivate or praise. Simply observe and clarify.`;
+      systemPrompt = `You are a thoughtful analyst helping someone reflect on a past decision. Be calm, insightful, and help them extract learning. Present insights as clear bullet points.`;
       
       userPrompt = `Analyze this decision reflection:
 
 Decision: ${data.decisionTitle}
 Original decision: ${data.originalDecision}
 Original reasoning: ${data.originalReasoning}
-Time since decision: ${data.reflectionType?.replace('_', ' ')}
-Did it age well: ${data.agedWell ? 'Yes' : 'No'}
-What surprised them: ${data.whatSurprised || 'Not provided'}
-What they would do differently: ${data.whatDifferently || 'Not provided'}
+Time since: ${data.reflectionType?.replace('_', ' ')}
+Aged well: ${data.agedWell ? 'Yes' : 'No'}
+Surprises: ${data.whatSurprised || 'Not provided'}
+Would do differently: ${data.whatDifferently || 'Not provided'}
 
-Provide a brief reflection analysis (2 paragraphs max) that:
-1. Identifies what they learned about their decision-making
-2. Notes any patterns worth watching in future decisions
-
-Be direct and insightful, not motivational.`;
+Provide:
+1. Key learning (2 bullet points)
+2. Pattern to watch in future decisions`;
     } else if (type === 'comparison') {
-      systemPrompt = `You are an expert at comparing decisions to reveal hidden trade-offs. Be analytical and direct. Highlight asymmetries and opportunity costs.`;
+      systemPrompt = `You are an expert at comparing decisions. Be analytical and direct. Use bullet points.`;
       
       const decisionsText = data.decisions?.map((d, i) => 
         `Option ${String.fromCharCode(65 + i)}: ${d.title}\nCategory: ${d.category}\nDescription: ${d.description}\nDecision: ${d.finalDecision}`
       ).join('\n\n') || 'No decisions provided';
       
-      userPrompt = `Compare these decisions to identify trade-offs:
+      userPrompt = `Compare these decisions:
 
 ${decisionsText}
 
-Provide analysis (3 paragraphs max) covering:
-1. Asymmetric upside: Which option has the best risk/reward ratio?
-2. Hidden opportunity costs: What does choosing one preclude?
-3. Emotional bias differences: Are some options being evaluated more emotionally than others?
-
-Be direct and analytical.`;
+Provide:
+1. Best risk/reward option
+2. Hidden opportunity costs (2 bullet points)
+3. Emotional bias differences`;
     } else if (type === 'second_order') {
-      systemPrompt = `You are an expert in second-order thinking. Help people see what decisions make easier or harder later. Be direct and insightful.`;
+      systemPrompt = `You are an expert in second-order thinking. Help people see consequences beyond the obvious. Use bullet points.`;
       
-      userPrompt = `Analyze the second-order effects of this decision:
+      userPrompt = `Analyze second-order effects:
 
 Decision: ${data.decisionTitle}
 Context: ${data.currentContext || 'Not provided'}
 
-Analyze (2-3 paragraphs):
-1. What does this decision make easier later?
-2. What doors does this close?
-3. What habits or patterns does this reinforce?
-
-Focus on effects that are not immediately obvious.`;
+Provide:
+1. What this makes easier later (2 bullets)
+2. What doors this closes (2 bullets)  
+3. Habits/patterns this reinforces`;
     } else if (type === 'bias_profile') {
-      systemPrompt = `You are building a private bias profile based on decision patterns. Be observational, not judgmental. Present insights as observations, not scores.`;
+      systemPrompt = `You are building a bias profile based on decision patterns. Be observational, not judgmental. Present as clear insights.`;
       
-      userPrompt = `Based on this user's decision history, identify patterns:
+      userPrompt = `Analyze this user's decision patterns:
 
-All detected biases across decisions: ${data.allBiases?.join(', ') || 'None recorded'}
-Decision patterns: ${JSON.stringify(data.decisionPatterns) || 'No patterns yet'}
+Detected biases: ${data.allBiases?.join(', ') || 'None recorded'}
+Patterns: ${JSON.stringify(data.decisionPatterns) || 'No patterns yet'}
 
-Provide insights (3-4 sentences max) in this format:
-- Common biases: [list the 2-3 most frequent]
-- Risk tolerance: [observation about their risk approach]
-- Pattern to watch: [one specific pattern, e.g., "You tend to avoid decisions with short-term discomfort even when long-term upside is high."]
-
-Present as observations, not judgments.`;
+Provide:
+1. Top 2-3 recurring biases
+2. Risk tolerance observation
+3. One specific pattern to watch`;
     }
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("[ANALYZE-REFLECTION] AI gateway error:", response.status, errorText);
-      
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limits exceeded, please try again later." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      throw new Error("AI analysis failed");
-    }
-
-    const aiResponse = await response.json();
-    const analysis = aiResponse.choices?.[0]?.message?.content || "Analysis could not be generated.";
+    const analysis = await getAIResponse(systemPrompt, userPrompt);
     
     console.log("[ANALYZE-REFLECTION] Analysis generated successfully");
 
@@ -148,7 +216,9 @@ Present as observations, not judgments.`;
     });
   } catch (error) {
     console.error("[ANALYZE-REFLECTION] Error:", error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), {
+    return new Response(JSON.stringify({ 
+      error: error instanceof Error ? error.message : "Unknown error" 
+    }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

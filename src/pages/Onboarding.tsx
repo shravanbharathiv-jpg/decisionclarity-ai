@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 import { 
   Brain, 
   Target, 
@@ -10,13 +12,17 @@ import {
   Lightbulb, 
   TrendingUp, 
   ArrowRight, 
-  Check,
+  ArrowLeft,
   Sparkles,
   Crown,
   Zap,
   Clock,
   Users,
-  BarChart3
+  BarChart3,
+  Heart,
+  Briefcase,
+  DollarSign,
+  Home
 } from 'lucide-react';
 
 interface OnboardingStep {
@@ -25,21 +31,89 @@ interface OnboardingStep {
   content: React.ReactNode;
 }
 
+interface SurveyAnswers {
+  struggleArea: string;
+  decisionFrequency: string;
+  biggestChallenge: string;
+  goalOutcome: string;
+}
+
 const Onboarding = () => {
   const [currentStep, setCurrentStep] = useState(0);
+  const [surveyAnswers, setSurveyAnswers] = useState<SurveyAnswers>({
+    struggleArea: '',
+    decisionFrequency: '',
+    biggestChallenge: '',
+    goalOutcome: '',
+  });
   const navigate = useNavigate();
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
+      // Store survey answers for personalization
+      localStorage.setItem('onboardingSurvey', JSON.stringify(surveyAnswers));
       navigate('/pricing');
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
     }
   };
 
   const handleSkip = () => {
     navigate('/auth');
   };
+
+  const updateSurvey = (key: keyof SurveyAnswers, value: string) => {
+    setSurveyAnswers(prev => ({ ...prev, [key]: value }));
+  };
+
+  const surveyQuestions = [
+    {
+      key: 'struggleArea' as const,
+      question: "What type of decisions do you struggle with most?",
+      options: [
+        { value: 'career', label: 'Career & Work', icon: Briefcase, desc: 'Job changes, promotions, projects' },
+        { value: 'money', label: 'Money & Finance', icon: DollarSign, desc: 'Investments, purchases, savings' },
+        { value: 'relationships', label: 'Relationships', icon: Heart, desc: 'Family, friends, partners' },
+        { value: 'life', label: 'Life Changes', icon: Home, desc: 'Moving, health, lifestyle' },
+      ]
+    },
+    {
+      key: 'decisionFrequency' as const,
+      question: "How often do you face difficult decisions?",
+      options: [
+        { value: 'daily', label: 'Daily', desc: 'I face tough choices every day' },
+        { value: 'weekly', label: 'Weekly', desc: 'A few times each week' },
+        { value: 'monthly', label: 'Monthly', desc: 'A few big ones each month' },
+        { value: 'rarely', label: 'Rarely', desc: 'Only occasionally, but they\'re major' },
+      ]
+    },
+    {
+      key: 'biggestChallenge' as const,
+      question: "What's your biggest decision-making challenge?",
+      options: [
+        { value: 'overthinking', label: 'Overthinking', desc: 'I analyze endlessly and can\'t commit' },
+        { value: 'fear', label: 'Fear of regret', desc: 'Worried I\'ll make the wrong choice' },
+        { value: 'clarity', label: 'Lack of clarity', desc: 'Don\'t know what I really want' },
+        { value: 'confidence', label: 'Low confidence', desc: 'Second-guess myself constantly' },
+      ]
+    },
+    {
+      key: 'goalOutcome' as const,
+      question: "What would success look like for you?",
+      options: [
+        { value: 'faster', label: 'Faster decisions', desc: 'Stop wasting time deliberating' },
+        { value: 'confident', label: 'More confidence', desc: 'Trust my judgment more' },
+        { value: 'clarity', label: 'Better clarity', desc: 'Understand what I truly want' },
+        { value: 'results', label: 'Better outcomes', desc: 'Make choices I won\'t regret' },
+      ]
+    },
+  ];
 
   const steps: OnboardingStep[] = [
     {
@@ -70,34 +144,42 @@ const Onboarding = () => {
         </div>
       ),
     },
-    {
-      title: "The Hidden Cost of Bad Decisions",
-      subtitle: "What's one unclear choice costing you?",
+    // Survey questions
+    ...surveyQuestions.map((q) => ({
+      title: q.question,
+      subtitle: "Help us personalize your experience",
       content: (
-        <div className="space-y-6">
-          <div className="grid gap-4">
-            {[
-              { cost: "£10,000+", label: "Wrong career move", desc: "Years of earning potential lost" },
-              { cost: "6+ months", label: "Analysis paralysis", desc: "Opportunities passing you by" },
-              { cost: "Priceless", label: "Peace of mind", desc: "Sleepless nights second-guessing" },
-            ].map((item, i) => (
-              <div key={i} className="p-4 rounded-lg border border-border/50 bg-card">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="font-medium text-foreground">{item.label}</p>
-                    <p className="text-sm text-muted-foreground">{item.desc}</p>
+        <div className="space-y-4">
+          <RadioGroup
+            value={surveyAnswers[q.key]}
+            onValueChange={(value) => updateSurvey(q.key, value)}
+            className="space-y-3"
+          >
+            {q.options.map((option) => (
+              <div key={option.value}>
+                <Label
+                  htmlFor={option.value}
+                  className={`flex items-start gap-4 p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                    surveyAnswers[q.key] === option.value
+                      ? 'border-primary bg-primary/5'
+                      : 'border-border/50 hover:border-border'
+                  }`}
+                >
+                  <RadioGroupItem value={option.value} id={option.value} className="mt-1" />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      {'icon' in option && option.icon && <option.icon className="h-4 w-4 text-primary" />}
+                      <span className="font-medium">{option.label}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1">{option.desc}</p>
                   </div>
-                  <span className="text-lg font-bold text-primary">{item.cost}</span>
-                </div>
+                </Label>
               </div>
             ))}
-          </div>
-          <p className="text-center text-muted-foreground text-sm">
-            One good decision can pay for this tool forever.
-          </p>
+          </RadioGroup>
         </div>
       ),
-    },
+    })),
     {
       title: "How Clarity Works",
       subtitle: "A 5-step system used by elite decision makers",
@@ -108,7 +190,7 @@ const Onboarding = () => {
             { step: 2, icon: Target, title: "Scenario Model", desc: "Explore best, worst, and likely outcomes", pro: true },
             { step: 3, icon: Shield, title: "Bias Check", desc: "AI detects cognitive blind spots", pro: true },
             { step: 4, icon: TrendingUp, title: "Second-Order Think", desc: "See ripple effects others miss", pro: true },
-            { step: 5, icon: Lightbulb, title: "Lock & Commit", desc: "End deliberation, move forward" },
+            { step: 5, icon: Lightbulb, title: "AI Recommendation", desc: "Get a clear recommendation before you decide", pro: true },
           ].map((item, i) => (
             <div 
               key={i} 
@@ -147,15 +229,15 @@ const Onboarding = () => {
               tag: "NEW"
             },
             { 
-              icon: Users, 
-              title: "Advisor Sharing", 
-              desc: "Share decisions with trusted mentors and get their input",
+              icon: Sparkles, 
+              title: "AI Recommendation", 
+              desc: "Get a clear recommendation before you lock in your decision",
               tag: "NEW"
             },
             { 
-              icon: Sparkles, 
-              title: "Templates Library", 
-              desc: "Pre-built frameworks for career, business, money & life decisions",
+              icon: Users, 
+              title: "Advisor Sharing", 
+              desc: "Share decisions with trusted mentors and get their input",
               tag: "PRO"
             },
             { 
@@ -202,7 +284,7 @@ const Onboarding = () => {
               role: "Startup Founder",
             },
             {
-              quote: "Finally, a tool that matches how my brain works. The structure is everything.",
+              quote: "The AI recommendation gave me the confidence to finally commit. Best £10 I've spent.",
               author: "Dr. Rachel K.",
               role: "Clinical Psychologist",
             },
@@ -226,6 +308,9 @@ const Onboarding = () => {
   ];
 
   const progress = ((currentStep + 1) / steps.length) * 100;
+  const isSurveyStep = currentStep >= 1 && currentStep <= 4;
+  const currentSurveyKey = isSurveyStep ? surveyQuestions[currentStep - 1]?.key : null;
+  const canProceed = !isSurveyStep || (currentSurveyKey && surveyAnswers[currentSurveyKey]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -256,8 +341,19 @@ const Onboarding = () => {
           </CardContent>
         </Card>
 
-        <div className="mt-8 flex justify-center">
-          <Button size="lg" onClick={handleNext} className="gap-2 min-w-[200px]">
+        <div className="mt-8 flex justify-center gap-3">
+          {currentStep > 0 && (
+            <Button variant="outline" size="lg" onClick={handleBack} className="gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+          )}
+          <Button 
+            size="lg" 
+            onClick={handleNext} 
+            className="gap-2 min-w-[200px]"
+            disabled={!canProceed}
+          >
             {currentStep === steps.length - 1 ? (
               <>
                 See Plans

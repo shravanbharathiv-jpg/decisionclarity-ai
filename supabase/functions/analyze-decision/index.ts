@@ -6,7 +6,7 @@ const corsHeaders = {
 };
 
 interface AnalysisRequest {
-  type: 'insight' | 'scenario' | 'bias';
+  type: 'insight' | 'scenario' | 'bias' | 'recommendation';
   decisionTitle: string;
   decisionDescription?: string;
   timeHorizon?: string;
@@ -18,6 +18,126 @@ interface AnalysisRequest {
   likelyCase?: string;
   worstCase?: string;
   allResponses?: Record<string, string>;
+  secondOrderEffects?: string;
+  detectedBiases?: string[];
+}
+
+// Groq API keys for fallback (compound model)
+const GROQ_KEYS = [
+  'GROQ_API_KEY_1',
+  'GROQ_API_KEY_2', 
+  'GROQ_API_KEY_3',
+  'GROQ_API_KEY_4',
+  'GROQ_API_KEY_5',
+];
+
+async function callLovableAI(systemPrompt: string, userPrompt: string) {
+  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+  if (!LOVABLE_API_KEY) {
+    throw new Error("LOVABLE_API_KEY not configured");
+  }
+
+  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const status = response.status;
+    if (status === 429 || status === 402 || status === 503) {
+      throw new Error(`LOVABLE_RATE_LIMITED:${status}`);
+    }
+    throw new Error(`Lovable AI error: ${status}`);
+  }
+
+  const data = await response.json();
+  return data.choices?.[0]?.message?.content || "";
+}
+
+async function callGroqAI(systemPrompt: string, userPrompt: string, keyIndex: number): Promise<string> {
+  const keyName = GROQ_KEYS[keyIndex];
+  const apiKey = Deno.env.get(keyName);
+  
+  if (!apiKey) {
+    throw new Error(`${keyName} not configured`);
+  }
+
+  console.log(`[ANALYZE-DECISION] Trying Groq key ${keyIndex + 1}/5`);
+
+  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "compound-beta",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      max_tokens: 2048,
+    }),
+  });
+
+  if (!response.ok) {
+    const status = response.status;
+    if (status === 429 || status === 402) {
+      throw new Error(`GROQ_RATE_LIMITED:${keyIndex}`);
+    }
+    const errorText = await response.text();
+    throw new Error(`Groq error: ${status} - ${errorText}`);
+  }
+
+  const data = await response.json();
+  return data.choices?.[0]?.message?.content || "";
+}
+
+async function getAIResponse(systemPrompt: string, userPrompt: string): Promise<string> {
+  // Try Lovable AI first
+  try {
+    console.log("[ANALYZE-DECISION] Trying Lovable AI...");
+    const result = await callLovableAI(systemPrompt, userPrompt);
+    console.log("[ANALYZE-DECISION] Lovable AI succeeded");
+    return result;
+  } catch (error: any) {
+    console.log("[ANALYZE-DECISION] Lovable AI failed:", error.message);
+    
+    // If rate limited, try Groq fallback
+    if (error.message?.includes("LOVABLE_RATE_LIMITED")) {
+      console.log("[ANALYZE-DECISION] Switching to Groq fallback...");
+      
+      // Try each Groq key in sequence
+      for (let i = 0; i < GROQ_KEYS.length; i++) {
+        try {
+          const result = await callGroqAI(systemPrompt, userPrompt, i);
+          console.log(`[ANALYZE-DECISION] Groq key ${i + 1} succeeded`);
+          return result;
+        } catch (groqError: any) {
+          console.log(`[ANALYZE-DECISION] Groq key ${i + 1} failed:`, groqError.message);
+          if (!groqError.message?.includes("GROQ_RATE_LIMITED")) {
+            // Non-rate-limit error, throw it
+            if (i === GROQ_KEYS.length - 1) throw groqError;
+          }
+          // Continue to next key
+        }
+      }
+      
+      throw new Error("All AI providers exhausted. Please try again later.");
+    }
+    
+    throw error;
+  }
 }
 
 serve(async (req) => {
@@ -26,68 +146,79 @@ serve(async (req) => {
   }
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      console.error("Configuration Error: LOVABLE_API_KEY is missing from environment variables.");
-      throw new Error("Server configuration error: API Key missing.");
-    }
-
     const body = await req.json().catch(() => null);
     if (!body) {
       throw new Error("Invalid JSON in request body");
     }
 
     const { type, ...data }: AnalysisRequest = body;
-    console.log(`[${new Date().toISOString()}] Processing ${type} analysis for: ${data.decisionTitle}`);
+    console.log(`[ANALYZE-DECISION] Processing ${type} analysis for: ${data.decisionTitle}`);
 
     let systemPrompt = "";
     let userPrompt = "";
 
     if (type === 'insight') {
-      systemPrompt = `You are an expert decision analyst. Provide clear, actionable insights. Focus on patterns and hidden assumptions.`;
-      userPrompt = `Analyze this decision: "${data.decisionTitle}"\nDescription: ${data.decisionDescription || 'N/A'}\n\nResponses:\n- Horizon: ${data.timeHorizon}\n- Reversibility: ${data.isReversible}\n- Fear: ${data.biggestFear}\n\nProvide 2-3 paragraphs of insight.`;
+      systemPrompt = `You are an expert decision analyst. Provide clear, actionable insights in a friendly, conversational tone. Focus on patterns and hidden assumptions. Format with bullet points for key insights.`;
+      userPrompt = `Analyze this decision: "${data.decisionTitle}"
+Description: ${data.decisionDescription || 'N/A'}
+
+User's answers:
+- Time horizon: ${data.timeHorizon || 'Not specified'}
+- Reversibility: ${data.isReversible || 'Not specified'}
+- Biggest fear: ${data.biggestFear || 'Not specified'}
+- Future regret: ${data.futureRegret || 'Not specified'}
+
+Provide 3-4 key insights as bullet points, each 1-2 sentences. Be direct and practical.`;
     } else if (type === 'scenario') {
-      systemPrompt = `You are an expert scenario analyst focusing on outcome asymmetry.`;
-      userPrompt = `Analyze these scenarios for "${data.decisionTitle}":\nBest: ${data.bestCase}\nLikely: ${data.likelyCase}\nWorst: ${data.worstCase}\n\nHighlight the risk/reward balance.`;
+      systemPrompt = `You are an expert scenario analyst. Analyze outcomes with clear probability assessments. Be direct and practical. Use bullet points.`;
+      userPrompt = `Analyze these scenarios for "${data.decisionTitle}":
+
+Best case: ${data.bestCase || 'Not provided'}
+Most likely: ${data.likelyCase || 'Not provided'}  
+Worst case: ${data.worstCase || 'Not provided'}
+
+Provide:
+1. Probability assessment for each scenario (Low/Medium/High likelihood)
+2. Risk/reward analysis in 2-3 bullet points
+3. One key insight about the decision's asymmetry`;
     } else if (type === 'bias') {
-      systemPrompt = `You are a cognitive bias expert. Detect 2-4 biases and provide counter-strategies.`;
+      systemPrompt = `You are a cognitive bias expert. Detect biases and provide specific counter-strategies. Be constructive, not judgmental. Format with clear sections.`;
       const responses = data.allResponses || {};
       const responseText = Object.entries(responses).map(([k, v]) => `${k}: ${v}`).join('\n');
-      userPrompt = `Detect biases in this data:\n${responseText}`;
+      userPrompt = `Detect cognitive biases in this decision data:
+
+Decision: ${data.decisionTitle}
+${responseText}
+
+For each bias detected:
+1. Name the bias
+2. Evidence from their responses  
+3. One specific counter-strategy
+
+Limit to 2-4 most relevant biases.`;
+    } else if (type === 'recommendation') {
+      systemPrompt = `You are a trusted decision advisor. Based on all the analysis, provide a clear recommendation. Be direct but acknowledge uncertainty. Format with clear structure.`;
+      userPrompt = `Based on this complete decision analysis, provide your recommendation:
+
+Decision: ${data.decisionTitle}
+Description: ${data.decisionDescription || 'N/A'}
+
+Scenarios analyzed:
+- Best case: ${data.bestCase || 'N/A'}
+- Most likely: ${data.likelyCase || 'N/A'}
+- Worst case: ${data.worstCase || 'N/A'}
+
+Detected biases: ${data.detectedBiases?.join(', ') || 'None identified'}
+Second-order effects: ${data.secondOrderEffects || 'Not analyzed'}
+
+Provide:
+1. Your recommendation (1-2 sentences, clear stance)
+2. Confidence level (High/Medium/Low) with reasoning
+3. Key factor that tips the scales
+4. One thing to watch out for after deciding`;
     }
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.0-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        temperature: 0.7,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error(`[AI GATEWAY ERROR] Status: ${response.status}`, errorData);
-
-      const statusMap: Record<number, string> = {
-        429: "The AI service is currently rate-limited. Please wait a moment.",
-        401: "AI Authentication failed. Check your API keys.",
-        402: "AI service quota exceeded.",
-        503: "AI Gateway is currently down."
-      };
-
-      throw new Error(statusMap[response.status] || `AI Gateway responded with ${response.status}`);
-    }
-
-    const aiResponse = await response.json();
-    const analysis = aiResponse.choices?.[0]?.message?.content;
+    const analysis = await getAIResponse(systemPrompt, userPrompt);
 
     if (!analysis) {
       throw new Error("AI returned an empty response.");
@@ -95,17 +226,26 @@ serve(async (req) => {
 
     let biases: string[] = [];
     if (type === 'bias') {
-      const commonBiases = ["Fear avoidance", "Sunk cost", "Status quo", "Overconfidence", "Loss aversion", "Confirmation bias"];
+      const commonBiases = [
+        "Confirmation bias", "Sunk cost fallacy", "Status quo bias", 
+        "Overconfidence", "Loss aversion", "Anchoring", 
+        "Availability heuristic", "Fear avoidance", "Optimism bias",
+        "Recency bias", "Bandwagon effect"
+      ];
       biases = commonBiases.filter(b => new RegExp(b, "gi").test(analysis));
     }
 
-    return new Response(JSON.stringify({ analysis, biases: biases.length > 0 ? biases : undefined }), {
+    return new Response(JSON.stringify({ 
+      analysis, 
+      biases: biases.length > 0 ? biases : undefined,
+      provider: 'ai'
+    }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
 
   } catch (error: any) {
-    console.error("[RUNTIME ERROR]", error.message);
+    console.error("[ANALYZE-DECISION] Error:", error.message);
     return new Response(JSON.stringify({
       error: error.message,
       timestamp: new Date().toISOString()

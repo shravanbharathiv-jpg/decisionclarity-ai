@@ -112,31 +112,24 @@ async function getAIResponse(systemPrompt: string, userPrompt: string): Promise<
     return result;
   } catch (error: any) {
     console.log("[ANALYZE-DECISION] Lovable AI failed:", error.message);
+    console.log("[ANALYZE-DECISION] Switching to Groq fallback...");
     
-    // If rate limited, try Groq fallback
-    if (error.message?.includes("LOVABLE_RATE_LIMITED")) {
-      console.log("[ANALYZE-DECISION] Switching to Groq fallback...");
-      
-      // Try each Groq key in sequence
-      for (let i = 0; i < GROQ_KEYS.length; i++) {
-        try {
-          const result = await callGroqAI(systemPrompt, userPrompt, i);
-          console.log(`[ANALYZE-DECISION] Groq key ${i + 1} succeeded`);
-          return result;
-        } catch (groqError: any) {
-          console.log(`[ANALYZE-DECISION] Groq key ${i + 1} failed:`, groqError.message);
-          if (!groqError.message?.includes("GROQ_RATE_LIMITED")) {
-            // Non-rate-limit error, throw it
-            if (i === GROQ_KEYS.length - 1) throw groqError;
-          }
-          // Continue to next key
+    // Try each Groq key in sequence on ANY Lovable AI failure
+    for (let i = 0; i < GROQ_KEYS.length; i++) {
+      try {
+        const result = await callGroqAI(systemPrompt, userPrompt, i);
+        console.log(`[ANALYZE-DECISION] Groq key ${i + 1} succeeded`);
+        return result;
+      } catch (groqError: any) {
+        console.log(`[ANALYZE-DECISION] Groq key ${i + 1} failed:`, groqError.message);
+        // Continue to next key on any error
+        if (i === GROQ_KEYS.length - 1) {
+          throw new Error("All AI providers exhausted. Please try again later.");
         }
       }
-      
-      throw new Error("All AI providers exhausted. Please try again later.");
     }
     
-    throw error;
+    throw new Error("All AI providers exhausted. Please try again later.");
   }
 }
 
@@ -152,6 +145,15 @@ serve(async (req) => {
     }
 
     const { type, ...data }: AnalysisRequest = body;
+    
+    // Validate required fields
+    if (!type) {
+      throw new Error("Analysis type is required");
+    }
+    if (!data.decisionTitle || data.decisionTitle.trim() === '') {
+      throw new Error("Decision title is required");
+    }
+    
     console.log(`[ANALYZE-DECISION] Processing ${type} analysis for: ${data.decisionTitle}`);
 
     let systemPrompt = "";

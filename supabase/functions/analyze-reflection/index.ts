@@ -114,27 +114,23 @@ async function getAIResponse(systemPrompt: string, userPrompt: string): Promise<
     return result;
   } catch (error: any) {
     console.log("[ANALYZE-REFLECTION] Lovable AI failed:", error.message);
+    console.log("[ANALYZE-REFLECTION] Switching to Groq fallback...");
     
-    if (error.message?.includes("LOVABLE_RATE_LIMITED")) {
-      console.log("[ANALYZE-REFLECTION] Switching to Groq fallback...");
-      
-      for (let i = 0; i < GROQ_KEYS.length; i++) {
-        try {
-          const result = await callGroqAI(systemPrompt, userPrompt, i);
-          console.log(`[ANALYZE-REFLECTION] Groq key ${i + 1} succeeded`);
-          return result;
-        } catch (groqError: any) {
-          console.log(`[ANALYZE-REFLECTION] Groq key ${i + 1} failed:`, groqError.message);
-          if (!groqError.message?.includes("GROQ_RATE_LIMITED")) {
-            if (i === GROQ_KEYS.length - 1) throw groqError;
-          }
+    // Try each Groq key in sequence on ANY Lovable AI failure
+    for (let i = 0; i < GROQ_KEYS.length; i++) {
+      try {
+        const result = await callGroqAI(systemPrompt, userPrompt, i);
+        console.log(`[ANALYZE-REFLECTION] Groq key ${i + 1} succeeded`);
+        return result;
+      } catch (groqError: any) {
+        console.log(`[ANALYZE-REFLECTION] Groq key ${i + 1} failed:`, groqError.message);
+        if (i === GROQ_KEYS.length - 1) {
+          throw new Error("All AI providers exhausted. Please try again later.");
         }
       }
-      
-      throw new Error("All AI providers exhausted. Please try again later.");
     }
     
-    throw error;
+    throw new Error("All AI providers exhausted. Please try again later.");
   }
 }
 

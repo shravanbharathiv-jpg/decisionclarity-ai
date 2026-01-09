@@ -6,8 +6,8 @@ const corsHeaders = {
 };
 
 interface AnalysisRequest {
-  type: 'insight' | 'scenario' | 'bias' | 'recommendation';
-  decisionTitle: string;
+  type: 'insight' | 'scenario' | 'bias' | 'recommendation' | 'profile';
+  decisionTitle?: string;
   decisionDescription?: string;
   timeHorizon?: string;
   isReversible?: string;
@@ -20,6 +20,15 @@ interface AnalysisRequest {
   allResponses?: Record<string, string>;
   secondOrderEffects?: string;
   detectedBiases?: string[];
+  decisions?: Array<{
+    title: string;
+    category?: string;
+    detected_biases?: string[];
+    time_horizon?: string;
+    is_reversible?: string;
+    biggest_fear?: string;
+    future_regret?: string;
+  }>;
 }
 
 // Groq API keys for fallback (compound model)
@@ -150,11 +159,13 @@ serve(async (req) => {
     if (!type) {
       throw new Error("Analysis type is required");
     }
-    if (!data.decisionTitle || data.decisionTitle.trim() === '') {
+    
+    // Profile type doesn't need decisionTitle, it uses decisions array
+    if (type !== 'profile' && (!data.decisionTitle || data.decisionTitle.trim() === '')) {
       throw new Error("Decision title is required");
     }
     
-    console.log(`[ANALYZE-DECISION] Processing ${type} analysis for: ${data.decisionTitle}`);
+    console.log(`[ANALYZE-DECISION] Processing ${type} analysis`);
 
     let systemPrompt = "";
     let userPrompt = "";
@@ -218,6 +229,37 @@ Provide:
 2. Confidence level (High/Medium/Low) with reasoning
 3. Key factor that tips the scales
 4. One thing to watch out for after deciding`;
+    } else if (type === 'profile') {
+      // Profile analysis for bias patterns across multiple decisions
+      if (!data.decisions || data.decisions.length < 2) {
+        throw new Error("At least 2 decisions are required for profile analysis");
+      }
+      
+      systemPrompt = `You are a behavioral psychology expert specializing in decision-making patterns. Analyze the user's decision history to identify patterns, biases, and tendencies. Be constructive and insightful. Provide actionable self-awareness tips.`;
+      
+      const decisionsText = data.decisions.map((d, i) => 
+        `Decision ${i + 1}: "${d.title}"
+  - Category: ${d.category || 'General'}
+  - Time horizon: ${d.time_horizon || 'Not specified'}
+  - Reversible: ${d.is_reversible || 'Not specified'}
+  - Biggest fear: ${d.biggest_fear || 'Not specified'}
+  - Future regret: ${d.future_regret || 'Not specified'}
+  - Detected biases: ${d.detected_biases?.join(', ') || 'None'}`
+      ).join('\n\n');
+      
+      userPrompt = `Analyze these ${data.decisions.length} decisions to create a psychological profile:
+
+${decisionsText}
+
+Provide a comprehensive but concise analysis with:
+1. **Overall Decision-Making Style**: 2-3 sentences describing their approach
+2. **Risk Tolerance**: Low/Medium/High with brief explanation
+3. **Common Biases**: List 2-4 recurring biases with evidence
+4. **Fear Patterns**: What drives their concerns?
+5. **Strengths**: 2-3 positive patterns in their decision-making
+6. **Growth Areas**: 2-3 actionable suggestions for improvement
+
+Keep the total response under 400 words. Be encouraging but honest.`;
     }
 
     const analysis = await getAIResponse(systemPrompt, userPrompt);
@@ -227,7 +269,7 @@ Provide:
     }
 
     let biases: string[] = [];
-    if (type === 'bias') {
+    if (type === 'bias' || type === 'profile') {
       const commonBiases = [
         "Confirmation bias", "Sunk cost fallacy", "Status quo bias", 
         "Overconfidence", "Loss aversion", "Anchoring", 
@@ -235,6 +277,26 @@ Provide:
         "Recency bias", "Bandwagon effect"
       ];
       biases = commonBiases.filter(b => new RegExp(b, "gi").test(analysis));
+    }
+    
+    // For profile type, extract additional structured data
+    if (type === 'profile') {
+      // Try to extract risk tolerance from the analysis
+      let riskTolerance = 'Medium';
+      if (/risk tolerance[:\s]*(low)/gi.test(analysis)) riskTolerance = 'Low';
+      else if (/risk tolerance[:\s]*(high)/gi.test(analysis)) riskTolerance = 'High';
+      
+      return new Response(JSON.stringify({ 
+        summary: analysis,
+        common_biases: biases.length > 0 ? biases : undefined,
+        risk_tolerance: riskTolerance,
+        fear_patterns: null, // Could be extracted with more sophisticated parsing
+        overconfidence_patterns: null,
+        provider: 'ai'
+      }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     return new Response(JSON.stringify({ 

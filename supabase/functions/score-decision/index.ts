@@ -93,27 +93,23 @@ async function getAIResponse(prompt: string): Promise<string> {
     return result;
   } catch (error: any) {
     console.log("[SCORE-DECISION] Lovable AI failed:", error.message);
+    console.log("[SCORE-DECISION] Switching to Groq fallback...");
     
-    if (error.message?.includes("LOVABLE_RATE_LIMITED")) {
-      console.log("[SCORE-DECISION] Switching to Groq fallback...");
-      
-      for (let i = 0; i < GROQ_KEYS.length; i++) {
-        try {
-          const result = await callGroqAI(prompt, i);
-          console.log(`[SCORE-DECISION] Groq key ${i + 1} succeeded`);
-          return result;
-        } catch (groqError: any) {
-          console.log(`[SCORE-DECISION] Groq key ${i + 1} failed:`, groqError.message);
-          if (!groqError.message?.includes("GROQ_RATE_LIMITED")) {
-            if (i === GROQ_KEYS.length - 1) throw groqError;
-          }
+    // Try each Groq key in sequence on ANY Lovable AI failure
+    for (let i = 0; i < GROQ_KEYS.length; i++) {
+      try {
+        const result = await callGroqAI(prompt, i);
+        console.log(`[SCORE-DECISION] Groq key ${i + 1} succeeded`);
+        return result;
+      } catch (groqError: any) {
+        console.log(`[SCORE-DECISION] Groq key ${i + 1} failed:`, groqError.message);
+        if (i === GROQ_KEYS.length - 1) {
+          throw new Error("All AI providers exhausted. Please try again later.");
         }
       }
-      
-      throw new Error("All AI providers exhausted. Please try again later.");
     }
     
-    throw error;
+    throw new Error("All AI providers exhausted. Please try again later.");
   }
 }
 

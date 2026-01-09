@@ -76,7 +76,7 @@ const Auth = () => {
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/dashboard`,
+            emailRedirectTo: `${window.location.origin}/onboarding`,
           },
         });
         if (error) throw error;
@@ -93,10 +93,11 @@ const Auth = () => {
         }
 
         toast({
-          title: 'Account created',
-          description: 'Welcome to Clarity! Check your email for a welcome message.',
+          title: 'Welcome to Clarity! 🎉',
+          description: "Let's personalize your experience with a quick survey.",
         });
-        navigate('/dashboard');
+        // Redirect new signups to onboarding
+        navigate('/onboarding');
       }
     } catch (error: any) {
       let message = error.message;

@@ -11,6 +11,7 @@ import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, ArrowRight, Loader2, Sparkles, Layers, Link2, Lightbulb, CheckCircle2, Zap, Clock, DoorOpen, DoorClosed, Repeat } from 'lucide-react';
 import { FormattedText } from '@/components/FormattedText';
+import { SummarizeButton } from '@/components/SummarizeButton';
 
 interface StepSecondOrderProps {
   decision: Decision;
@@ -47,6 +48,7 @@ export const StepSecondOrder = ({ decision, onUpdate, onNext }: StepSecondOrderP
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [analysis, setAnalysis] = useState(decision.ai_second_order_analysis || '');
+  const [displayedAnalysis, setDisplayedAnalysis] = useState(decision.ai_second_order_analysis || '');
   const [showCategories, setShowCategories] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -77,6 +79,7 @@ export const StepSecondOrder = ({ decision, onUpdate, onNext }: StepSecondOrderP
       if (error) throw error;
 
       setAnalysis(data.analysis);
+      setDisplayedAnalysis(data.analysis);
       await onUpdate({ ai_second_order_analysis: data.analysis });
     } catch (error: any) {
       console.error('Error generating analysis:', error);
@@ -169,7 +172,13 @@ export const StepSecondOrder = ({ decision, onUpdate, onNext }: StepSecondOrderP
                       <h3 className="font-semibold">AI Analysis</h3>
                     </div>
                     <div className="bg-muted/30 rounded-lg p-4 border border-border/50">
-                      <FormattedText content={analysis} />
+                      <FormattedText content={displayedAnalysis} />
+                    </div>
+                    <div className="flex justify-end">
+                      <SummarizeButton 
+                        content={analysis} 
+                        onSummaryGenerated={(summary) => setDisplayedAnalysis(summary)} 
+                      />
                     </div>
                   </div>
                 )}

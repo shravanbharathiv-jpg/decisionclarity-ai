@@ -9,6 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import { ArrowLeft, Calendar, CheckCircle2, Sparkles, AlertTriangle, Clock, Share2, BarChart3, Loader2, TrendingUp, Brain, Shield, Target } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import { FormattedText } from '@/components/FormattedText';
+import { SummarizeButton } from '@/components/SummarizeButton';
 import { useToast } from '@/hooks/use-toast';
 
 interface DecisionScore {
@@ -30,6 +31,8 @@ export const DecisionComplete = ({ decision }: DecisionCompleteProps) => {
   const [scores, setScores] = useState<DecisionScore | null>(null);
   const [loadingScores, setLoadingScores] = useState(true);
   const [showShareDialog, setShowShareDialog] = useState(false);
+  const [displayedInsight, setDisplayedInsight] = useState(decision.ai_insight_summary || '');
+  const [displayedScoreExplanation, setDisplayedScoreExplanation] = useState('');
 
   useEffect(() => {
     fetchOrGenerateScores();
@@ -45,14 +48,16 @@ export const DecisionComplete = ({ decision }: DecisionCompleteProps) => {
         .single();
 
       if (existingScores) {
-        setScores({
+        const scoreData = {
           overall_score: existingScores.overall_score || 0,
           clarity_score: existingScores.clarity_score || 0,
           bias_score: existingScores.bias_score || 0,
           reversibility_score: existingScores.reversibility_score || 0,
           analysis_depth_score: existingScores.analysis_depth_score || 0,
           explanation: existingScores.ai_score_explanation || '',
-        });
+        };
+        setScores(scoreData);
+        setDisplayedScoreExplanation(scoreData.explanation);
         setLoadingScores(false);
         return;
       }
@@ -65,6 +70,7 @@ export const DecisionComplete = ({ decision }: DecisionCompleteProps) => {
       if (error) throw error;
 
       setScores(data);
+      setDisplayedScoreExplanation(data.explanation || '');
 
       // Save to database
       await supabase.from('decision_scores').insert({
@@ -206,11 +212,19 @@ export const DecisionComplete = ({ decision }: DecisionCompleteProps) => {
 
                   {/* AI Explanation */}
                   {scores.explanation && (
-                    <div className="p-4 rounded-lg bg-muted/50 text-sm text-muted-foreground">
-                      <p className="flex items-start gap-2">
-                        <Sparkles className="h-4 w-4 mt-0.5 flex-shrink-0 text-primary" />
-                        {scores.explanation}
-                      </p>
+                    <div className="space-y-2">
+                      <div className="p-4 rounded-lg bg-muted/50 text-sm text-muted-foreground">
+                        <p className="flex items-start gap-2">
+                          <Sparkles className="h-4 w-4 mt-0.5 flex-shrink-0 text-primary" />
+                          {displayedScoreExplanation}
+                        </p>
+                      </div>
+                      <div className="flex justify-end">
+                        <SummarizeButton 
+                          content={scores.explanation} 
+                          onSummaryGenerated={(summary) => setDisplayedScoreExplanation(summary)} 
+                        />
+                      </div>
                     </div>
                   )}
                 </div>
@@ -287,8 +301,14 @@ export const DecisionComplete = ({ decision }: DecisionCompleteProps) => {
                   AI Insights
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <FormattedText content={decision.ai_insight_summary} />
+              <CardContent className="space-y-3">
+                <FormattedText content={displayedInsight} />
+                <div className="flex justify-end">
+                  <SummarizeButton 
+                    content={decision.ai_insight_summary} 
+                    onSummaryGenerated={(summary) => setDisplayedInsight(summary)} 
+                  />
+                </div>
               </CardContent>
             </Card>
           )}

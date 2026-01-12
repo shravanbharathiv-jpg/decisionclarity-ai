@@ -10,6 +10,7 @@ import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, ArrowRight, Loader2, Sparkles, TrendingUp, TrendingDown, Target, CheckCircle2, HelpCircle } from 'lucide-react';
 import { FormattedText } from '@/components/FormattedText';
+import { SummarizeButton } from '@/components/SummarizeButton';
 
 interface StepScenariosProps {
   decision: Decision;
@@ -197,6 +198,13 @@ export const StepScenarios = ({ decision, onUpdate, onNext }: StepScenariosProps
 
               <div className="bg-muted/30 rounded-lg p-3 sm:p-4 max-h-[35vh] overflow-y-auto">
                 <FormattedText content={analysis} />
+              </div>
+              
+              <div className="flex justify-end">
+                <SummarizeButton 
+                  content={analysis} 
+                  onSummaryGenerated={(summary) => setAnalysis(summary)} 
+                />
               </div>
               
               <Button onClick={onNext} className="w-full gap-2">

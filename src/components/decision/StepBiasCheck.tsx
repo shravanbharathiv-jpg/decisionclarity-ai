@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, ArrowRight, Loader2, AlertTriangle, Sparkles, Brain, CheckCircle2, Info } from 'lucide-react';
 import { FormattedText } from '@/components/FormattedText';
+import { SummarizeButton } from '@/components/SummarizeButton';
 
 interface StepBiasCheckProps {
   decision: Decision;
@@ -53,6 +54,7 @@ export const StepBiasCheck = ({ decision, onUpdate, onNext }: StepBiasCheckProps
   const [loading, setLoading] = useState(false);
   const [biases, setBiases] = useState<string[]>(decision.detected_biases || []);
   const [explanation, setExplanation] = useState(decision.ai_bias_explanation || '');
+  const [displayedExplanation, setDisplayedExplanation] = useState(decision.ai_bias_explanation || '');
   const [acknowledgedBiases, setAcknowledgedBiases] = useState<string[]>([]);
   const [step, setStep] = useState<'check' | 'acknowledge' | 'result'>('check');
   const navigate = useNavigate();
@@ -61,6 +63,7 @@ export const StepBiasCheck = ({ decision, onUpdate, onNext }: StepBiasCheckProps
   useEffect(() => {
     if (explanation) {
       setStep('result');
+      setDisplayedExplanation(explanation);
     }
   }, []);
 
@@ -92,6 +95,7 @@ export const StepBiasCheck = ({ decision, onUpdate, onNext }: StepBiasCheckProps
 
       setBiases(data.biases || []);
       setExplanation(data.analysis);
+      setDisplayedExplanation(data.analysis);
       
       await onUpdate({
         detected_biases: data.biases || [],
@@ -173,7 +177,14 @@ export const StepBiasCheck = ({ decision, onUpdate, onNext }: StepBiasCheckProps
               )}
 
               <div className="bg-muted/30 rounded-lg p-3 sm:p-4 max-h-[35vh] overflow-y-auto">
-                <FormattedText content={explanation} />
+                <FormattedText content={displayedExplanation} />
+              </div>
+              
+              <div className="flex justify-end">
+                <SummarizeButton 
+                  content={explanation} 
+                  onSummaryGenerated={(summary) => setDisplayedExplanation(summary)} 
+                />
               </div>
 
               <div className="p-4 rounded-lg border border-primary/20 bg-primary/5">

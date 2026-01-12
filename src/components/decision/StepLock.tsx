@@ -91,29 +91,44 @@ export const StepLock = ({ decision, onUpdate }: StepLockProps) => {
 
     setLoading(true);
 
-    const summary = `Decision: ${decision.title}\n\n${finalDecision}\n\nKey Reasons:\n${keyReasons}\n\nRisks Accepted:\n${risksAccepted || 'None specified'}\n\nBiases Acknowledged:\n${decision.detected_biases?.join(', ') || 'None detected'}`;
+    try {
+      const summary = `Decision: ${decision.title}\n\n${finalDecision}\n\nKey Reasons:\n${keyReasons}\n\nRisks Accepted:\n${risksAccepted || 'None specified'}\n\nBiases Acknowledged:\n${decision.detected_biases?.join(', ') || 'None detected'}`;
 
-    const success = await onUpdate({
-      final_decision: finalDecision,
-      key_reasons: keyReasons,
-      risks_accepted: risksAccepted,
-      confidence_rating: confidence,
-      biases_acknowledged: decision.detected_biases?.join(', ') || null,
-      decision_summary: summary,
-      is_locked: true,
-      locked_at: new Date().toISOString(),
-      status: 'completed',
-    });
-
-    if (success) {
-      toast({
-        title: '🎉 Decision locked!',
-        description: 'Your decision has been recorded. Time to move forward with confidence.',
+      const success = await onUpdate({
+        final_decision: finalDecision,
+        key_reasons: keyReasons,
+        risks_accepted: risksAccepted,
+        confidence_rating: confidence,
+        biases_acknowledged: decision.detected_biases?.join(', ') || null,
+        decision_summary: summary,
+        is_locked: true,
+        locked_at: new Date().toISOString(),
+        status: 'completed',
       });
-      navigate(`/decision/${decision.id}`);
-    }
 
-    setLoading(false);
+      if (success) {
+        toast({
+          title: '🎉 Decision locked!',
+          description: 'Your decision has been recorded. Time to move forward with confidence.',
+        });
+        navigate(`/decision/${decision.id}`);
+      } else {
+        toast({
+          title: 'Error',
+          description: 'Failed to save your decision. Please try again.',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      console.error('Error locking decision:', error);
+      toast({
+        title: 'Error',
+        description: 'Something went wrong. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Analysis completeness score
@@ -144,11 +159,11 @@ export const StepLock = ({ decision, onUpdate }: StepLockProps) => {
           </div>
         </header>
         
-        <main className="container mx-auto px-4 py-12 max-w-xl">
+        <main className="container mx-auto px-3 sm:px-4 py-6 sm:py-12 max-w-xl">
           <Card className="border-border/50">
-            <CardContent className="py-16">
-              <div className="text-center space-y-6">
-                <div className="relative w-24 h-24 mx-auto">
+            <CardContent className="py-10 sm:py-16">
+              <div className="text-center space-y-4 sm:space-y-6">
+                <div className="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto">
                   <div className="absolute inset-0 rounded-full border-4 border-primary/20" />
                   <div className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin" />
                   <Sparkles className="absolute inset-0 m-auto h-10 w-10 text-primary animate-pulse" />
@@ -202,63 +217,62 @@ export const StepLock = ({ decision, onUpdate }: StepLockProps) => {
           </div>
         </header>
         
-        <main className="container mx-auto px-4 py-8 max-w-2xl">
-          <div className="mb-6 space-y-2">
-            <div className="flex items-center justify-between text-sm">
+        <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-2xl">
+          <div className="mb-4 sm:mb-6 space-y-2">
+            <div className="flex items-center justify-between text-xs sm:text-sm">
               <span className="text-muted-foreground">Step 6 of 6</span>
               <span className="font-medium text-primary">AI Recommendation</span>
             </div>
-            <Progress value={100} className="h-2" />
+            <Progress value={100} className="h-1.5 sm:h-2" />
           </div>
 
-          <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-background shadow-lg mb-6">
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Sparkles className="h-5 w-5 text-primary" />
+          <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-background shadow-lg mb-4 sm:mb-6">
+            <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg">AI Recommendation</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-base sm:text-lg">AI Recommendation</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">
                     Based on your complete analysis
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-background/80 rounded-lg p-4 border border-border/50">
+            <CardContent className="space-y-3 sm:space-y-4 px-3 sm:px-6">
+              <div className="bg-background/80 rounded-lg p-3 sm:p-4 border border-border/50 max-h-[40vh] overflow-y-auto">
                 <FormattedText content={aiRecommendation} />
               </div>
 
               {/* Analysis quality badge */}
-              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
-                <div className="flex items-center gap-2">
-                  <Award className={`h-5 w-5 ${analysisColor}`} />
-                  <span className="text-sm font-medium">Analysis Quality</span>
+              <div className="flex items-center justify-between p-2 sm:p-3 rounded-lg bg-muted/30">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <Award className={`h-4 w-4 sm:h-5 sm:w-5 ${analysisColor}`} />
+                  <span className="text-xs sm:text-sm font-medium">Analysis Quality</span>
                 </div>
-                <Badge variant="outline" className={analysisColor}>
-                  {analysisQuality} ({analysisScore}/6 factors)
+                <Badge variant="outline" className={`${analysisColor} text-xs`}>
+                  {analysisQuality} ({analysisScore}/6)
                 </Badge>
               </div>
 
-              <div className="flex gap-3 pt-2">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-1 sm:pt-2">
                 <Button 
                   variant="outline" 
                   onClick={() => setStep('form')} 
-                  className="flex-1"
+                  className="flex-1 text-sm h-10 sm:h-11"
                 >
-                  <ThumbsDown className="h-4 w-4 mr-2" />
-                  Disagree - Decide Differently
+                  <ThumbsDown className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                  Disagree
                 </Button>
                 <Button 
                   onClick={() => {
-                    // Pre-fill based on recommendation
                     setFinalDecision(`Based on the AI analysis and my own reflection, I've decided to ${decision.title.toLowerCase()}`);
                     setStep('form');
                   }} 
-                  className="flex-1"
+                  className="flex-1 text-sm h-10 sm:h-11"
                 >
-                  <ThumbsUp className="h-4 w-4 mr-2" />
+                  <ThumbsUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
                   Agree - Lock Decision
                 </Button>
               </div>
@@ -283,48 +297,48 @@ export const StepLock = ({ decision, onUpdate }: StepLockProps) => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-2xl">
-        <div className="mb-6 space-y-2">
-          <div className="flex items-center justify-between text-sm">
+      <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-2xl">
+        <div className="mb-4 sm:mb-6 space-y-2">
+          <div className="flex items-center justify-between text-xs sm:text-sm">
             <span className="text-muted-foreground">Final Step</span>
             <span className="font-medium text-primary">Lock Your Decision</span>
           </div>
-          <Progress value={100} className="h-2" />
+          <Progress value={100} className="h-1.5 sm:h-2" />
         </div>
 
         <Card className="border-border/50 shadow-lg">
-          <CardHeader className="text-center pb-2">
-            <Badge className="w-fit mx-auto mb-3 bg-amber-500/10 text-amber-600 border-amber-500/20">
+          <CardHeader className="text-center pb-2 px-3 sm:px-6">
+            <Badge className="w-fit mx-auto mb-2 sm:mb-3 bg-amber-500/10 text-amber-600 border-amber-500/20 text-xs">
               <Lock className="h-3 w-3 mr-1" />
               Decision Time
             </Badge>
-            <CardTitle className="text-xl">{decision.title}</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-lg sm:text-xl px-2">{decision.title}</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">
               You've done the analysis. Now it's time to commit.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4 sm:space-y-6 px-3 sm:px-6">
             {/* Quick summary */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="p-3 rounded-lg bg-green-500/10 text-center">
-                <CheckCircle className="h-5 w-5 text-green-500 mx-auto mb-1" />
-                <p className="text-xs text-muted-foreground">Scenarios</p>
-                <p className="text-sm font-medium">
-                  {decision.best_case_scenario ? '✓ Done' : '—'}
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              <div className="p-2 sm:p-3 rounded-lg bg-green-500/10 text-center">
+                <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mx-auto mb-0.5 sm:mb-1" />
+                <p className="text-[10px] sm:text-xs text-muted-foreground">Scenarios</p>
+                <p className="text-xs sm:text-sm font-medium">
+                  {decision.best_case_scenario ? '✓' : '—'}
                 </p>
               </div>
-              <div className="p-3 rounded-lg bg-amber-500/10 text-center">
-                <AlertTriangle className="h-5 w-5 text-amber-500 mx-auto mb-1" />
-                <p className="text-xs text-muted-foreground">Biases</p>
-                <p className="text-sm font-medium">
-                  {decision.detected_biases?.length || 0} found
+              <div className="p-2 sm:p-3 rounded-lg bg-amber-500/10 text-center">
+                <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-500 mx-auto mb-0.5 sm:mb-1" />
+                <p className="text-[10px] sm:text-xs text-muted-foreground">Biases</p>
+                <p className="text-xs sm:text-sm font-medium">
+                  {decision.detected_biases?.length || 0}
                 </p>
               </div>
-              <div className="p-3 rounded-lg bg-blue-500/10 text-center">
-                <TrendingUp className="h-5 w-5 text-blue-500 mx-auto mb-1" />
-                <p className="text-xs text-muted-foreground">Effects</p>
-                <p className="text-sm font-medium">
-                  {decision.second_order_effects ? '✓ Done' : '—'}
+              <div className="p-2 sm:p-3 rounded-lg bg-blue-500/10 text-center">
+                <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500 mx-auto mb-0.5 sm:mb-1" />
+                <p className="text-[10px] sm:text-xs text-muted-foreground">Effects</p>
+                <p className="text-xs sm:text-sm font-medium">
+                  {decision.second_order_effects ? '✓' : '—'}
                 </p>
               </div>
             </div>

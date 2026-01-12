@@ -165,37 +165,37 @@ export const StepScenarios = ({ decision, onUpdate, onNext }: StepScenariosProps
           </div>
         </header>
 
-        <main className="container mx-auto px-4 py-12 max-w-2xl">
+        <main className="container mx-auto px-3 sm:px-4 py-6 sm:py-12 max-w-2xl">
           <Card className="border-border/50">
-            <CardHeader className="text-center">
-              <div className="text-sm text-muted-foreground mb-2">Step 3 of 5</div>
-              <CardTitle className="text-xl">{decision.title}</CardTitle>
+            <CardHeader className="text-center px-3 sm:px-6">
+              <div className="text-xs sm:text-sm text-muted-foreground mb-2">Step 3 of 5</div>
+              <CardTitle className="text-lg sm:text-xl">{decision.title}</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-4 sm:space-y-6 px-3 sm:px-6">
               <div className="flex items-center gap-2 text-primary">
                 <Sparkles className="h-5 w-5" />
                 <h3 className="font-semibold">AI Scenario Analysis</h3>
               </div>
               
               {/* Scenario Summary Cards */}
-              <div className="grid gap-3">
+              <div className="grid gap-2 sm:gap-3">
                 {scenarioSteps.map((s, i) => (
-                  <div key={s.key} className={`p-3 rounded-lg ${s.bgColor} flex items-start gap-3`}>
-                    <div className={`p-1.5 rounded ${s.color} bg-background`}>
-                      <s.icon className="h-4 w-4" />
+                  <div key={s.key} className={`p-2 sm:p-3 rounded-lg ${s.bgColor} flex items-start gap-2 sm:gap-3`}>
+                    <div className={`p-1 sm:p-1.5 rounded ${s.color} bg-background flex-shrink-0`}>
+                      <s.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium">{s.title}</p>
-                      <p className="text-xs text-muted-foreground line-clamp-2">
+                      <p className="text-xs sm:text-sm font-medium">{s.title}</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground line-clamp-2">
                         {answers[s.key as keyof typeof answers]}
                       </p>
                     </div>
-                    <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600 flex-shrink-0" />
                   </div>
                 ))}
               </div>
 
-              <div className="bg-muted/30 rounded-lg p-4">
+              <div className="bg-muted/30 rounded-lg p-3 sm:p-4 max-h-[35vh] overflow-y-auto">
                 <FormattedText content={analysis} />
               </div>
               

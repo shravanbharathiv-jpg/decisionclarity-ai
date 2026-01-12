@@ -142,13 +142,13 @@ export const StepBiasCheck = ({ decision, onUpdate, onNext }: StepBiasCheckProps
           </div>
         </header>
 
-        <main className="container mx-auto px-4 py-12 max-w-2xl">
+        <main className="container mx-auto px-3 sm:px-4 py-6 sm:py-12 max-w-2xl">
           <Card className="border-border/50">
-            <CardHeader className="text-center">
-              <div className="text-sm text-muted-foreground mb-2">Step 4 of 5</div>
-              <CardTitle className="text-xl">{decision.title}</CardTitle>
+            <CardHeader className="text-center px-3 sm:px-6">
+              <div className="text-xs sm:text-sm text-muted-foreground mb-2">Step 4 of 5</div>
+              <CardTitle className="text-lg sm:text-xl">{decision.title}</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-4 sm:space-y-6 px-3 sm:px-6">
               <div className="flex items-center gap-2 text-primary">
                 <Brain className="h-5 w-5" />
                 <h3 className="font-semibold">Bias Analysis Complete</h3>
@@ -172,7 +172,7 @@ export const StepBiasCheck = ({ decision, onUpdate, onNext }: StepBiasCheckProps
                 </div>
               )}
 
-              <div className="bg-muted/30 rounded-lg p-4">
+              <div className="bg-muted/30 rounded-lg p-3 sm:p-4 max-h-[35vh] overflow-y-auto">
                 <FormattedText content={explanation} />
               </div>
 

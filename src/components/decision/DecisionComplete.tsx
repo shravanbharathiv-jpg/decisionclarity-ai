@@ -102,16 +102,16 @@ export const DecisionComplete = ({ decision }: DecisionCompleteProps) => {
     score: number; 
     description: string;
   }) => (
-    <div className="p-4 rounded-lg bg-muted/30 space-y-2">
+    <div className="p-3 sm:p-4 rounded-lg bg-muted/30 space-y-2">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Icon className="h-4 w-4 text-primary" />
-          <span className="text-sm font-medium">{label}</span>
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
+          <span className="text-xs sm:text-sm font-medium">{label}</span>
         </div>
-        <span className={`text-lg font-bold ${getScoreColor(score)}`}>{score}</span>
+        <span className={`text-base sm:text-lg font-bold ${getScoreColor(score)}`}>{score}</span>
       </div>
-      <Progress value={score} className="h-2" />
-      <p className="text-xs text-muted-foreground">{description}</p>
+      <Progress value={score} className="h-1.5 sm:h-2" />
+      <p className="text-[10px] sm:text-xs text-muted-foreground">{description}</p>
     </div>
   );
 
@@ -133,17 +133,17 @@ export const DecisionComplete = ({ decision }: DecisionCompleteProps) => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-12 max-w-3xl">
-        <div className="space-y-6">
+      <main className="container mx-auto px-3 sm:px-4 py-6 sm:py-12 max-w-3xl">
+        <div className="space-y-4 sm:space-y-6">
           {/* Header */}
           <div className="text-center space-y-2">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4">
-              <CheckCircle2 className="h-8 w-8 text-primary" />
+            <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-full mb-3 sm:mb-4">
+              <CheckCircle2 className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
             </div>
-            <h1 className="text-2xl font-semibold text-foreground">{decision.title}</h1>
+            <h1 className="text-xl sm:text-2xl font-semibold text-foreground px-2">{decision.title}</h1>
             {decision.locked_at && (
-              <p className="text-sm text-muted-foreground flex items-center justify-center gap-1">
-                <Calendar className="h-4 w-4" />
+              <p className="text-xs sm:text-sm text-muted-foreground flex items-center justify-center gap-1">
+                <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 Decided on {format(new Date(decision.locked_at), 'MMMM d, yyyy')}
               </p>
             )}
@@ -177,7 +177,7 @@ export const DecisionComplete = ({ decision }: DecisionCompleteProps) => {
                   </div>
 
                   {/* Score Breakdown */}
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                     <ScoreCard
                       icon={Target}
                       label="Clarity"

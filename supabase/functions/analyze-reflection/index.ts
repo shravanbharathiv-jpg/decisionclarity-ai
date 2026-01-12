@@ -6,7 +6,7 @@ const corsHeaders = {
 };
 
 interface ReflectionRequest {
-  type: 'reflection' | 'comparison' | 'second_order' | 'bias_profile';
+  type: 'reflection' | 'comparison' | 'second_order' | 'bias_profile' | 'summarize';
   decisionTitle?: string;
   originalDecision?: string;
   originalReasoning?: string;
@@ -23,6 +23,7 @@ interface ReflectionRequest {
   currentContext?: string;
   allBiases?: string[];
   decisionPatterns?: any;
+  content?: string; // For summarization
 }
 
 // Groq API keys for fallback
@@ -201,6 +202,20 @@ Provide:
 1. Top 2-3 recurring biases
 2. Risk tolerance observation
 3. One specific pattern to watch`;
+    } else if (type === 'summarize') {
+      systemPrompt = `You are an expert at creating clear, digestible summaries. Transform complex analysis into actionable bullet points that are easy to scan and understand. Be concise but preserve key insights.`;
+      
+      userPrompt = `Summarize this content into a digestible format with 3-5 key bullet points:
+
+${data.content || 'No content provided'}
+
+Format as:
+• **Key Point 1:** Brief explanation
+• **Key Point 2:** Brief explanation
+• **Key Point 3:** Brief explanation
+(Continue as needed, max 5 points)
+
+Keep each point under 20 words. Focus on actionable insights.`;
     }
 
     const analysis = await getAIResponse(systemPrompt, userPrompt);

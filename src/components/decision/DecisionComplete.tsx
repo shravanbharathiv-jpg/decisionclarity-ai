@@ -107,19 +107,21 @@ export const DecisionComplete = ({ decision }: DecisionCompleteProps) => {
     label: string; 
     score: number; 
     description: string;
-  }) => (
-    <div className="p-3 sm:p-4 rounded-lg bg-muted/30 space-y-2">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
-          <span className="text-xs sm:text-sm font-medium">{label}</span>
+  }) => {
+    return (
+      <div className="p-3 sm:p-4 rounded-lg bg-muted/30 space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
+            <span className="text-xs sm:text-sm font-medium">{label}</span>
+          </div>
+          <span className={`text-base sm:text-lg font-bold ${getScoreColor(score)}`}>{score}</span>
         </div>
-        <span className={`text-base sm:text-lg font-bold ${getScoreColor(score)}`}>{score}</span>
+        <Progress value={score} className="h-1.5 sm:h-2" />
+        <p className="text-[10px] sm:text-xs text-muted-foreground">{description}</p>
       </div>
-      <Progress value={score} className="h-1.5 sm:h-2" />
-      <p className="text-[10px] sm:text-xs text-muted-foreground">{description}</p>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background">

@@ -460,36 +460,39 @@ export const StepLock = ({ decision, onUpdate }: StepLockProps) => {
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button 
-                  className="w-full gap-2" 
+                  className="w-full gap-2 text-sm sm:text-base h-11 sm:h-12" 
                   size="lg"
                   disabled={!canLock || loading}
                 >
                   {loading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Saving...</span>
+                    </>
                   ) : (
                     <>
                       <Lock className="h-4 w-4" />
-                      Lock Decision Forever
+                      <span>Lock Decision Forever</span>
                     </>
                   )}
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent>
+              <AlertDialogContent className="max-w-[90vw] sm:max-w-lg mx-2 sm:mx-auto">
                 <AlertDialogHeader>
-                  <AlertDialogTitle className="flex items-center gap-2">
-                    <Lock className="h-5 w-5" />
+                  <AlertDialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    <Lock className="h-4 w-4 sm:h-5 sm:w-5" />
                     Lock this decision?
                   </AlertDialogTitle>
-                  <AlertDialogDescription>
+                  <AlertDialogDescription className="text-sm">
                     Once locked, this decision becomes permanent. This is designed to 
                     help you stop second-guessing and move forward with confidence.
                     <br /><br />
                     You'll be able to reflect on it later, but not change it.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Keep editing</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleLock} className="gap-2">
+                <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                  <AlertDialogCancel className="w-full sm:w-auto">Keep editing</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleLock} className="gap-2 w-full sm:w-auto">
                     <Lock className="h-4 w-4" />
                     Yes, lock it
                   </AlertDialogAction>

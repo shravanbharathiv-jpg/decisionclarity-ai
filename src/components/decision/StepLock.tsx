@@ -35,7 +35,11 @@ export const StepLock = ({ decision, onUpdate }: StepLockProps) => {
   const [finalDecision, setFinalDecision] = useState(decision.final_decision || '');
   const [keyReasons, setKeyReasons] = useState(decision.key_reasons || '');
   const [risksAccepted, setRisksAccepted] = useState(decision.risks_accepted || '');
-  const [confidence, setConfidence] = useState(decision.confidence_rating || 70);
+  const [confidence, setConfidence] = useState(() => {
+    // Stored in DB as 1–10 (see decisions_confidence_rating_check)
+    const initial = decision.confidence_rating ?? 7;
+    return Math.min(10, Math.max(1, Math.round(initial)));
+  });
   const [loading, setLoading] = useState(false);
   const [aiRecommendation, setAiRecommendation] = useState<string | null>(null);
   const [loadingRecommendation, setLoadingRecommendation] = useState(false);
@@ -92,13 +96,15 @@ export const StepLock = ({ decision, onUpdate }: StepLockProps) => {
     setLoading(true);
 
     try {
+      const normalizedConfidence = Math.min(10, Math.max(1, Math.round(confidence)));
+
       const summary = `Decision: ${decision.title}\n\n${finalDecision}\n\nKey Reasons:\n${keyReasons}\n\nRisks Accepted:\n${risksAccepted || 'None specified'}\n\nBiases Acknowledged:\n${decision.detected_biases?.join(', ') || 'None detected'}`;
 
       const success = await onUpdate({
         final_decision: finalDecision,
         key_reasons: keyReasons,
         risks_accepted: risksAccepted,
-        confidence_rating: confidence,
+        confidence_rating: normalizedConfidence,
         biases_acknowledged: decision.detected_biases?.join(', ') || null,
         decision_summary: summary,
         is_locked: true,
@@ -406,23 +412,27 @@ export const StepLock = ({ decision, onUpdate }: StepLockProps) => {
               <div className="flex items-center gap-4">
                 <input
                   type="range"
-                  min="0"
-                  max="100"
+                  min="1"
+                  max="10"
+                  step="1"
                   value={confidence}
-                  onChange={(e) => setConfidence(parseInt(e.target.value))}
+                  onChange={(e) => setConfidence(parseInt(e.target.value, 10))}
                   className="flex-1 h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
                 />
-                <span className={`text-lg font-bold min-w-[60px] text-right ${
-                  confidence >= 70 ? 'text-green-500' : confidence >= 40 ? 'text-amber-500' : 'text-red-500'
-                }`}>
-                  {confidence}%
+                <span
+                  className={`text-lg font-bold min-w-[60px] text-right ${
+                    confidence >= 8 ? 'text-green-500' : confidence >= 5 ? 'text-amber-500' : 'text-red-500'
+                  }`}
+                >
+                  {confidence}/10
                 </span>
               </div>
               <p className="text-xs text-muted-foreground text-center">
-                {confidence >= 80 ? 'Very confident - you\'ve thought this through!' :
-                 confidence >= 60 ? 'Reasonably confident - a solid decision.' :
-                 confidence >= 40 ? 'Somewhat uncertain - consider if more analysis would help.' :
-                 'Low confidence - is there more you need to explore?'}
+                {confidence >= 8
+                  ? "High confidence — you've thought this through."
+                  : confidence >= 5
+                    ? 'Moderate confidence — solid, but consider any remaining unknowns.'
+                    : 'Low confidence — consider doing a bit more analysis before locking.'}
               </p>
             </div>
 

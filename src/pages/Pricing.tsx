@@ -42,7 +42,6 @@ const PLANS = [
       { text: 'AI bias detection', included: true },
       { text: 'Second-order thinking', included: true },
       { text: 'Decision templates', included: true },
-      { text: 'Advisor sharing', included: true },
     ],
     icon: Sparkles,
     popular: false,

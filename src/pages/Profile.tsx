@@ -5,9 +5,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Brain, TrendingUp, AlertTriangle, Loader2, User, Crown, Zap, Sparkles, Settings } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { ArrowLeft, Brain, TrendingUp, AlertTriangle, Loader2, User, Crown, Zap, Sparkles, Settings, Target, Clock, CheckCircle2, BarChart3, Calendar } from 'lucide-react';
 import { FormattedText } from '@/components/FormattedText';
 import { useToast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
 
 interface BiasProfile {
   id: string;
@@ -29,6 +31,15 @@ interface ProfileData {
   stripe_payment_status: string | null;
 }
 
+interface DecisionStats {
+  total: number;
+  thisMonth: number;
+  completed: number;
+  inProgress: number;
+  avgConfidence: number;
+  categories: Record<string, number>;
+}
+
 const Profile = () => {
   const { user, subscriptionTier, hasPaid, isAdmin, checkPaymentStatus } = useAuth();
   const navigate = useNavigate();
@@ -37,8 +48,14 @@ const Profile = () => {
   const [biasProfile, setBiasProfile] = useState<BiasProfile | null>(null);
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
-  const [decisionsThisMonth, setDecisionsThisMonth] = useState(0);
-  const [totalDecisions, setTotalDecisions] = useState(0);
+  const [stats, setStats] = useState<DecisionStats>({
+    total: 0,
+    thisMonth: 0,
+    completed: 0,
+    inProgress: 0,
+    avgConfidence: 0,
+    categories: {},
+  });
 
   useEffect(() => {
     if (!user) {
@@ -54,7 +71,7 @@ const Profile = () => {
       const [biasRes, profileRes, decisionsRes] = await Promise.all([
         supabase.from('bias_profiles').select('*').eq('user_id', user!.id).single(),
         supabase.from('profiles').select('*').eq('user_id', user!.id).single(),
-        supabase.from('decisions').select('id, created_at, status').eq('user_id', user!.id)
+        supabase.from('decisions').select('id, created_at, status, category, confidence_rating').eq('user_id', user!.id)
       ]);
 
       if (biasRes.data) {
@@ -64,15 +81,40 @@ const Profile = () => {
         setProfile(profileRes.data);
       }
       
-      // Calculate decisions this month
+      // Calculate stats
       if (decisionsRes.data) {
         const now = new Date();
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         const thisMonthDecisions = decisionsRes.data.filter(d => 
           new Date(d.created_at) >= startOfMonth
         ).length;
-        setDecisionsThisMonth(thisMonthDecisions);
-        setTotalDecisions(decisionsRes.data.length);
+        
+        const completed = decisionsRes.data.filter(d => d.status === 'completed').length;
+        const inProgress = decisionsRes.data.filter(d => d.status !== 'completed').length;
+        
+        // Calculate average confidence
+        const ratings = decisionsRes.data
+          .filter(d => d.confidence_rating != null)
+          .map(d => d.confidence_rating as number);
+        const avgConfidence = ratings.length > 0 
+          ? Math.round(ratings.reduce((a, b) => a + b, 0) / ratings.length * 10)
+          : 0;
+        
+        // Calculate category distribution
+        const categories: Record<string, number> = {};
+        decisionsRes.data.forEach(d => {
+          const cat = d.category || 'Uncategorized';
+          categories[cat] = (categories[cat] || 0) + 1;
+        });
+
+        setStats({
+          total: decisionsRes.data.length,
+          thisMonth: thisMonthDecisions,
+          completed,
+          inProgress,
+          avgConfidence,
+          categories,
+        });
       }
 
       // Also refresh payment status from Stripe
@@ -199,82 +241,120 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border/50">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
           <button
             onClick={() => navigate('/dashboard')}
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to dashboard
+            <span className="hidden xs:inline">Back to dashboard</span>
+            <span className="xs:hidden">Back</span>
           </button>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-12 max-w-2xl">
-        <div className="space-y-6">
-          <div className="text-center space-y-2">
-            <h1 className="text-2xl font-semibold text-foreground">Profile & Insights</h1>
-            <p className="text-muted-foreground">
+      <main className="container mx-auto px-3 sm:px-4 py-6 sm:py-12 max-w-3xl">
+        <div className="space-y-4 sm:space-y-6">
+          <div className="text-center space-y-1 sm:space-y-2">
+            <h1 className="text-xl sm:text-2xl font-semibold text-foreground">Profile & Insights</h1>
+            <p className="text-sm text-muted-foreground">
               Understand your decision-making patterns
             </p>
           </div>
 
+          {/* Quick Stats */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+            <Card className="border-border/50">
+              <CardContent className="p-3 sm:p-4 text-center">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-1.5 sm:mb-2">
+                  <Target className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                </div>
+                <p className="text-lg sm:text-2xl font-bold text-foreground">{stats.total}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">Total Decisions</p>
+              </CardContent>
+            </Card>
+            <Card className="border-border/50">
+              <CardContent className="p-3 sm:p-4 text-center">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-1.5 sm:mb-2">
+                  <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
+                </div>
+                <p className="text-lg sm:text-2xl font-bold text-foreground">{stats.completed}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">Completed</p>
+              </CardContent>
+            </Card>
+            <Card className="border-border/50">
+              <CardContent className="p-3 sm:p-4 text-center">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto mb-1.5 sm:mb-2">
+                  <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-amber-500" />
+                </div>
+                <p className="text-lg sm:text-2xl font-bold text-foreground">{stats.inProgress}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">In Progress</p>
+              </CardContent>
+            </Card>
+            <Card className="border-border/50">
+              <CardContent className="p-3 sm:p-4 text-center">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-500/10 flex items-center justify-center mx-auto mb-1.5 sm:mb-2">
+                  <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
+                </div>
+                <p className="text-lg sm:text-2xl font-bold text-foreground">{stats.avgConfidence}%</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">Avg Confidence</p>
+              </CardContent>
+            </Card>
+          </div>
+
           {/* Account Info */}
           <Card className="border-border/50">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <User className="h-5 w-5" />
+            <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
+              <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                <User className="h-4 w-4 sm:h-5 sm:w-5" />
                 Account
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Email</span>
-                <span className="text-foreground">{profile?.email || user?.email}</span>
+            <CardContent className="space-y-3 sm:space-y-4 px-3 sm:px-6">
+              <div className="flex flex-col xs:flex-row xs:justify-between xs:items-center gap-1 xs:gap-0">
+                <span className="text-sm text-muted-foreground">Email</span>
+                <span className="text-sm text-foreground truncate">{profile?.email || user?.email}</span>
               </div>
               
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Plan</span>
+                <span className="text-sm text-muted-foreground">Plan</span>
                 <div className="flex items-center gap-2">
                   <PlanIcon className={`h-4 w-4 ${plan.color}`} />
-                  <span className="text-foreground font-medium">{plan.name}</span>
+                  <span className="text-sm text-foreground font-medium">{plan.name}</span>
                 </div>
               </div>
               
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Status</span>
-                <Badge className={status.color}>{status.text}</Badge>
+                <span className="text-sm text-muted-foreground">Status</span>
+                <Badge className={`${status.color} text-xs`}>{status.text}</Badge>
               </div>
               
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Decisions this month</span>
-                <span className="text-foreground">
-                  {decisionsThisMonth}
+                <span className="text-sm text-muted-foreground">Decisions this month</span>
+                <span className="text-sm text-foreground">
+                  {stats.thisMonth}
                   {!hasPaid && <span className="text-muted-foreground"> / 3</span>}
                 </span>
-              </div>
-              
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Total decisions</span>
-                <span className="text-foreground">{totalDecisions}</span>
               </div>
 
               {profile?.subscription_end_date && subscriptionTier === 'premium' && (
                 <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Renews on</span>
-                  <span className="text-foreground">
-                    {new Date(profile.subscription_end_date).toLocaleDateString()}
+                  <span className="text-sm text-muted-foreground">Renews on</span>
+                  <span className="text-sm text-foreground flex items-center gap-1.5">
+                    <Calendar className="h-3.5 w-3.5" />
+                    {format(new Date(profile.subscription_end_date), 'MMM d, yyyy')}
                   </span>
                 </div>
               )}
 
-              <div className="pt-4 flex gap-2">
+              <div className="pt-2 sm:pt-4 flex flex-col sm:flex-row gap-2">
                 {!hasPaid ? (
-                  <Button onClick={() => navigate('/pricing')} className="flex-1">
+                  <Button onClick={() => navigate('/pricing')} className="flex-1 h-10 sm:h-11 text-sm">
+                    <Sparkles className="h-4 w-4 mr-2" />
                     Upgrade to Pro
                   </Button>
                 ) : subscriptionTier !== 'lifetime' && !isAdmin ? (
-                  <Button variant="outline" onClick={handleManageSubscription} className="flex-1">
+                  <Button variant="outline" onClick={handleManageSubscription} className="flex-1 h-10 sm:h-11 text-sm">
                     <Settings className="h-4 w-4 mr-2" />
                     Manage Subscription
                   </Button>
@@ -283,12 +363,44 @@ const Profile = () => {
             </CardContent>
           </Card>
 
+          {/* Category Distribution */}
+          {Object.keys(stats.categories).length > 0 && (
+            <Card className="border-border/50">
+              <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
+                <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5" />
+                  Decision Categories
+                </CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
+                  Distribution of your decisions by category
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3 px-3 sm:px-6">
+                {Object.entries(stats.categories)
+                  .sort((a, b) => b[1] - a[1])
+                  .slice(0, 5)
+                  .map(([category, count]) => {
+                    const percentage = Math.round((count / stats.total) * 100);
+                    return (
+                      <div key={category} className="space-y-1.5">
+                        <div className="flex justify-between text-xs sm:text-sm">
+                          <span className="text-foreground capitalize">{category}</span>
+                          <span className="text-muted-foreground">{count} ({percentage}%)</span>
+                        </div>
+                        <Progress value={percentage} className="h-1.5 sm:h-2" />
+                      </div>
+                    );
+                  })}
+              </CardContent>
+            </Card>
+          )}
+
           {/* Bias Profile */}
           <Card className="border-border/50">
-            <CardHeader>
+            <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Brain className="h-5 w-5" />
+                <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                  <Brain className="h-4 w-4 sm:h-5 sm:w-5" />
                   Bias Profile
                 </CardTitle>
                 <Button
@@ -296,9 +408,14 @@ const Profile = () => {
                   size="sm"
                   onClick={analyzeProfile}
                   disabled={analyzing || !hasPaid}
+                  className="h-8 sm:h-9 text-xs sm:text-sm"
                 >
                   {analyzing ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin mr-1.5" />
+                      <span className="hidden xs:inline">Analyzing...</span>
+                      <span className="xs:hidden">...</span>
+                    </>
                   ) : biasProfile ? (
                     'Refresh'
                   ) : (
@@ -306,34 +423,36 @@ const Profile = () => {
                   )}
                 </Button>
               </div>
-              <CardDescription>
+              <CardDescription className="text-xs sm:text-sm">
                 Based on {biasProfile?.total_decisions_analyzed || 0} completed decisions
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3 sm:space-y-4 px-3 sm:px-6">
               {!hasPaid ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Brain className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Upgrade to Pro to unlock your personalized bias profile.</p>
-                  <Button onClick={() => navigate('/pricing')} variant="outline" className="mt-4">
+                <div className="text-center py-6 sm:py-8 text-muted-foreground">
+                  <Brain className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 opacity-50" />
+                  <p className="text-sm mb-3 sm:mb-4">Upgrade to Pro to unlock your personalized bias profile.</p>
+                  <Button onClick={() => navigate('/pricing')} variant="outline" className="h-9 sm:h-10 text-sm">
                     View Plans
                   </Button>
                 </div>
               ) : biasProfile?.ai_profile_summary ? (
                 <>
-                  <FormattedText content={biasProfile.ai_profile_summary} />
+                  <div className="bg-muted/30 rounded-lg p-3 sm:p-4">
+                    <FormattedText content={biasProfile.ai_profile_summary} />
+                  </div>
 
                   {biasProfile.common_biases && biasProfile.common_biases.length > 0 && (
                     <div className="space-y-2">
-                      <h4 className="text-sm font-medium flex items-center gap-2">
-                        <AlertTriangle className="h-4 w-4" />
+                      <h4 className="text-xs sm:text-sm font-medium flex items-center gap-2">
+                        <AlertTriangle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                         Common Biases
                       </h4>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-1.5 sm:gap-2">
                         {biasProfile.common_biases.map((bias, i) => (
                           <span
                             key={i}
-                            className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-destructive/10 text-destructive"
+                            className="inline-flex items-center px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm bg-destructive/10 text-destructive"
                           >
                             {bias}
                           </span>
@@ -344,18 +463,38 @@ const Profile = () => {
 
                   {biasProfile.risk_tolerance && (
                     <div className="space-y-1">
-                      <h4 className="text-sm font-medium flex items-center gap-2">
-                        <TrendingUp className="h-4 w-4" />
+                      <h4 className="text-xs sm:text-sm font-medium flex items-center gap-2">
+                        <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                         Risk Tolerance
                       </h4>
-                      <p className="text-sm text-muted-foreground">{biasProfile.risk_tolerance}</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">{biasProfile.risk_tolerance}</p>
+                    </div>
+                  )}
+
+                  {biasProfile.fear_patterns && (
+                    <div className="space-y-1">
+                      <h4 className="text-xs sm:text-sm font-medium flex items-center gap-2">
+                        <AlertTriangle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                        Fear Patterns
+                      </h4>
+                      <p className="text-xs sm:text-sm text-muted-foreground">{biasProfile.fear_patterns}</p>
+                    </div>
+                  )}
+
+                  {biasProfile.overconfidence_patterns && (
+                    <div className="space-y-1">
+                      <h4 className="text-xs sm:text-sm font-medium flex items-center gap-2">
+                        <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                        Overconfidence Patterns
+                      </h4>
+                      <p className="text-xs sm:text-sm text-muted-foreground">{biasProfile.overconfidence_patterns}</p>
                     </div>
                   )}
                 </>
               ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Brain className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Complete at least 2 decisions to generate your bias profile.</p>
+                <div className="text-center py-6 sm:py-8 text-muted-foreground">
+                  <Brain className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 opacity-50" />
+                  <p className="text-sm">Complete at least 2 decisions to generate your bias profile.</p>
                 </div>
               )}
             </CardContent>

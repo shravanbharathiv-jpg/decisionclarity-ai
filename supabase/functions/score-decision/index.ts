@@ -5,13 +5,16 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Groq API keys for fallback
+// Groq API keys for fallback (8 total)
 const GROQ_KEYS = [
   'GROQ_API_KEY_1',
   'GROQ_API_KEY_2', 
   'GROQ_API_KEY_3',
   'GROQ_API_KEY_4',
   'GROQ_API_KEY_5',
+  'GROQ_API_KEY_6',
+  'GROQ_API_KEY_7',
+  'GROQ_API_KEY_8',
 ];
 
 async function callLovableAI(prompt: string) {
@@ -55,7 +58,7 @@ async function callGroqAI(prompt: string, keyIndex: number): Promise<string> {
     throw new Error(`${keyName} not configured`);
   }
 
-  console.log(`[SCORE-DECISION] Trying Groq key ${keyIndex + 1}/5`);
+  console.log(`[SCORE-DECISION] Trying Groq key ${keyIndex + 1}/${GROQ_KEYS.length}`);
 
   const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
@@ -64,12 +67,13 @@ async function callGroqAI(prompt: string, keyIndex: number): Promise<string> {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "compound-beta",
+      model: "groq/compound",
       messages: [
         { role: "system", content: "You are a decision quality analyst. Respond only with valid JSON." },
         { role: "user", content: prompt }
       ],
       max_tokens: 1024,
+      temperature: 0.1,
     }),
   });
 

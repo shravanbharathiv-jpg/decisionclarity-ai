@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Check, Loader2, ArrowLeft, Sparkles, Crown, Zap, X, Lock, BarChart3, Users, Brain, TrendingUp } from 'lucide-react';
+import { Check, Loader2, ArrowLeft, Sparkles, Crown, Zap, X, Lock, BarChart3, Brain, TrendingUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const PLANS = {
@@ -22,7 +22,6 @@ const PLANS = {
       { name: 'Second-order thinking', included: false },
       { name: 'AI decision scoring', included: false },
       { name: 'Decision templates', included: false },
-      { name: 'Advisor sharing', included: false },
       { name: 'Comparison mode', included: false },
       { name: 'Long-term reflections', included: false },
     ],
@@ -39,7 +38,6 @@ const PLANS = {
       { name: 'Second-order thinking', included: true },
       { name: 'AI decision scoring', included: true },
       { name: 'Decision templates', included: true },
-      { name: 'Advisor sharing', included: true },
       { name: 'Comparison mode', included: true },
       { name: 'Long-term reflections', included: true },
     ],
@@ -47,9 +45,9 @@ const PLANS = {
 };
 
 const PRICING = {
-  monthly: { price: '£9.99', period: '/month', priceId: 'price_1SjfrMHXuJ6GDDWi0ppujkcu', savings: null },
-  yearly: { price: '£69.99', period: '/year', priceId: 'price_1SjfrSHXuJ6GDDWiWcRS1Vg3', savings: 'Save 42%' },
-  lifetime: { price: '£99.99', period: 'one-time', priceId: 'price_1SjfrUHXuJ6GDDWi0krEVPGU', savings: 'Best Value' },
+  monthly: { price: '£9.99', period: '/month', priceId: 'price_1SjfrMHXuJ6GDDWi0ppujkcu', savings: null, trial: '7-day free trial' },
+  yearly: { price: '£69.99', period: '/year', priceId: 'price_1SjfrSHXuJ6GDDWiWcRS1Vg3', savings: 'Save 42%', trial: '7-day free trial' },
+  lifetime: { price: '£99.99', period: 'one-time', priceId: 'price_1SjfrUHXuJ6GDDWi0krEVPGU', savings: 'Best Value', trial: null },
 };
 
 const Upgrade = () => {
@@ -123,41 +121,41 @@ const Upgrade = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-12 max-w-4xl">
+      <main className="container mx-auto px-4 py-8 md:py-12 max-w-4xl">
         <div className="text-center space-y-4 mb-8">
           <Badge className="bg-primary/10 text-primary border-0">
             <Lock className="h-3 w-3 mr-1" />
             Premium Feature
           </Badge>
-          <h1 className="text-3xl font-semibold text-foreground tracking-tight">
+          <h1 className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight">
             Unlock Scenario Modeling & More
           </h1>
-          <p className="text-lg text-muted-foreground max-w-xl mx-auto">
+          <p className="text-base md:text-lg text-muted-foreground max-w-xl mx-auto">
             You've discovered a Pro feature. Upgrade to access the full decision-making system.
           </p>
         </div>
 
         {/* Feature highlights */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8">
           {[
             { icon: Sparkles, label: 'Scenario Modeling' },
             { icon: Brain, label: 'Bias Detection' },
             { icon: BarChart3, label: 'AI Scoring' },
-            { icon: Users, label: 'Advisor Sharing' },
+            { icon: TrendingUp, label: 'Second-Order' },
           ].map((item, i) => (
-            <div key={i} className="flex flex-col items-center gap-2 p-4 rounded-lg bg-primary/5 border border-primary/10">
-              <item.icon className="h-6 w-6 text-primary" />
-              <span className="text-sm font-medium text-center">{item.label}</span>
+            <div key={i} className="flex flex-col items-center gap-2 p-3 md:p-4 rounded-lg bg-primary/5 border border-primary/10">
+              <item.icon className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+              <span className="text-xs md:text-sm font-medium text-center">{item.label}</span>
             </div>
           ))}
         </div>
 
         {/* Billing toggle */}
-        <div className="flex justify-center mb-8">
+        <div className="flex justify-center mb-8 overflow-x-auto">
           <Tabs value={billingCycle} onValueChange={(v) => setBillingCycle(v as any)}>
             <TabsList className="grid grid-cols-3">
-              <TabsTrigger value="monthly">Monthly</TabsTrigger>
-              <TabsTrigger value="yearly" className="relative">
+              <TabsTrigger value="monthly" className="text-xs md:text-sm">Monthly</TabsTrigger>
+              <TabsTrigger value="yearly" className="relative text-xs md:text-sm">
                 Yearly
                 {PRICING.yearly.savings && (
                   <Badge className="absolute -top-3 -right-3 text-[10px] bg-green-500 text-white">
@@ -165,7 +163,7 @@ const Upgrade = () => {
                   </Badge>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="lifetime" className="relative">
+              <TabsTrigger value="lifetime" className="relative text-xs md:text-sm">
                 Lifetime
                 {PRICING.lifetime.savings && (
                   <Badge className="absolute -top-3 -right-3 text-[10px] bg-primary">
@@ -178,7 +176,7 @@ const Upgrade = () => {
         </div>
 
         {/* Plan comparison */}
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 gap-4 md:gap-6">
           {/* Free plan */}
           <Card className="border-border/50">
             <CardHeader>
@@ -188,14 +186,14 @@ const Upgrade = () => {
               </div>
               <CardDescription>{PLANS.free.description}</CardDescription>
               <div className="pt-2">
-                <span className="text-3xl font-bold">£0</span>
+                <span className="text-2xl md:text-3xl font-bold">£0</span>
                 <span className="text-muted-foreground"> forever</span>
               </div>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-3">
+              <ul className="space-y-2 md:space-y-3">
                 {PLANS.free.features.map((feature, i) => (
-                  <li key={i} className="flex items-center gap-2 text-sm">
+                  <li key={i} className="flex items-center gap-2 text-xs md:text-sm">
                     {feature.included ? (
                       <Check className="h-4 w-4 text-primary shrink-0" />
                     ) : (
@@ -229,14 +227,19 @@ const Upgrade = () => {
               </div>
               <CardDescription>{PLANS.pro.description}</CardDescription>
               <div className="pt-2">
-                <span className="text-3xl font-bold">{currentPricing.price}</span>
+                <span className="text-2xl md:text-3xl font-bold">{currentPricing.price}</span>
                 <span className="text-muted-foreground"> {currentPricing.period}</span>
               </div>
+              {currentPricing.trial && (
+                <Badge variant="outline" className="mt-2 text-xs">
+                  {currentPricing.trial}
+                </Badge>
+              )}
             </CardHeader>
             <CardContent>
-              <ul className="space-y-3">
+              <ul className="space-y-2 md:space-y-3">
                 {PLANS.pro.features.map((feature, i) => (
-                  <li key={i} className="flex items-center gap-2 text-sm">
+                  <li key={i} className="flex items-center gap-2 text-xs md:text-sm">
                     <Check className="h-4 w-4 text-primary shrink-0" />
                     <span>{feature.name}</span>
                   </li>
@@ -267,7 +270,7 @@ const Upgrade = () => {
         </div>
 
         <div className="mt-8 text-center space-y-2">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs md:text-sm text-muted-foreground">
             ✓ 7-day money-back guarantee • ✓ Cancel anytime • ✓ Secure payment via Stripe
           </p>
         </div>

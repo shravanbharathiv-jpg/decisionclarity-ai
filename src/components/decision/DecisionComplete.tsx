@@ -126,7 +126,7 @@ export const DecisionComplete = ({ decision }: DecisionCompleteProps) => {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border/50">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+        <div className="container mx-auto px-4 py-4">
           <button
             onClick={() => navigate('/dashboard')}
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
@@ -134,10 +134,6 @@ export const DecisionComplete = ({ decision }: DecisionCompleteProps) => {
             <ArrowLeft className="h-4 w-4" />
             Back to dashboard
           </button>
-          <Button variant="outline" size="sm" onClick={() => setShowShareDialog(true)}>
-            <Share2 className="h-4 w-4 mr-2" />
-            Share with Advisor
-          </Button>
         </div>
       </header>
 

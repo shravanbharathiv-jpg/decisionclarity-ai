@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Check, Loader2, ArrowLeft, Sparkles, Zap, Crown, X, BarChart3, Users, Brain, TrendingUp, Shield } from 'lucide-react';
+import { Check, Loader2, ArrowLeft, Sparkles, Zap, Crown, X, BarChart3, Brain, TrendingUp, Shield } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const PLANS = [
@@ -23,7 +23,6 @@ const PLANS = [
       { text: 'Second-order thinking', included: false },
       { text: 'AI decision scoring', included: false },
       { text: 'Decision templates', included: false },
-      { text: 'Advisor sharing', included: false },
     ],
     icon: Zap,
     popular: false,
@@ -45,6 +44,7 @@ const PLANS = [
     ],
     icon: Sparkles,
     popular: false,
+    trial: '7-day free trial',
   },
   {
     id: 'yearly',
@@ -61,6 +61,7 @@ const PLANS = [
     icon: Crown,
     popular: false,
     savings: 'Save 42%',
+    trial: '7-day free trial',
   },
   {
     id: 'lifetime',
@@ -147,12 +148,12 @@ const Pricing = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-12 max-w-6xl">
+      <main className="container mx-auto px-4 py-8 md:py-12 max-w-6xl">
         <div className="text-center space-y-4 mb-8">
-          <h1 className="text-4xl font-semibold text-foreground tracking-tight">
+          <h1 className="text-2xl md:text-4xl font-semibold text-foreground tracking-tight">
             Choose Your Clarity Plan
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
             One good decision can pay for this forever. Cancel anytime.
           </p>
           {hasPaid && (
@@ -163,22 +164,22 @@ const Pricing = () => {
         </div>
 
         {/* Feature highlights */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 max-w-3xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8 md:mb-12 max-w-3xl mx-auto">
           {[
             { icon: Sparkles, label: 'Scenario Modeling', desc: 'Best/worst/likely' },
             { icon: Brain, label: 'Bias Detection', desc: 'AI-powered' },
             { icon: BarChart3, label: 'Decision Scoring', desc: '0-100 quality score' },
-            { icon: Users, label: 'Advisor Sharing', desc: 'Get trusted input' },
+            { icon: TrendingUp, label: 'Second-Order', desc: 'See ripple effects' },
           ].map((item, i) => (
-            <div key={i} className="text-center p-4 rounded-lg bg-muted/30">
-              <item.icon className="h-6 w-6 text-primary mx-auto mb-2" />
-              <p className="text-sm font-medium">{item.label}</p>
-              <p className="text-xs text-muted-foreground">{item.desc}</p>
+            <div key={i} className="text-center p-3 md:p-4 rounded-lg bg-muted/30">
+              <item.icon className="h-5 w-5 md:h-6 md:w-6 text-primary mx-auto mb-2" />
+              <p className="text-xs md:text-sm font-medium">{item.label}</p>
+              <p className="text-[10px] md:text-xs text-muted-foreground">{item.desc}</p>
             </div>
           ))}
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {PLANS.map((plan) => {
             const Icon = plan.icon;
             const isCurrentPlan = 
@@ -210,9 +211,14 @@ const Pricing = () => {
                   <CardTitle className="text-lg">{plan.name}</CardTitle>
                   <CardDescription className="text-xs">{plan.description}</CardDescription>
                   <div className="pt-3">
-                    <span className="text-3xl font-bold text-foreground">{plan.price}</span>
+                    <span className="text-2xl md:text-3xl font-bold text-foreground">{plan.price}</span>
                     <span className="text-muted-foreground text-sm">{plan.period !== 'forever' && plan.period !== 'one-time' ? plan.period : ` ${plan.period}`}</span>
                   </div>
+                  {plan.trial && (
+                    <Badge variant="outline" className="mt-2 text-xs">
+                      {plan.trial}
+                    </Badge>
+                  )}
                 </CardHeader>
                 
                 <CardContent className="space-y-4">
@@ -266,13 +272,13 @@ const Pricing = () => {
           })}
         </div>
 
-        <div className="mt-12 text-center space-y-3">
+        <div className="mt-8 md:mt-12 text-center space-y-3">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 border border-green-500/20">
             <Shield className="h-4 w-4 text-green-600" />
-            <span className="text-sm font-medium text-green-600">3-Day Money Back Guarantee</span>
+            <span className="text-sm font-medium text-green-600">7-Day Money Back Guarantee</span>
           </div>
-          <p className="text-sm text-muted-foreground">
-            ✓ Full refund within 3 days, no questions asked • ✓ Cancel anytime • ✓ Secure payment via Stripe
+          <p className="text-xs md:text-sm text-muted-foreground">
+            ✓ Full refund within 7 days, no questions asked • ✓ Cancel anytime • ✓ Secure payment via Stripe
           </p>
           <p className="text-xs text-muted-foreground">
             Questions? Contact support@clarity-app.com

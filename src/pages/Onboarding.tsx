@@ -235,9 +235,9 @@ const Onboarding = () => {
               tag: "NEW"
             },
             { 
-              icon: Users, 
-              title: "Advisor Sharing", 
-              desc: "Share decisions with trusted mentors and get their input",
+              icon: TrendingUp, 
+              title: "Long-term Reflections", 
+              desc: "Revisit decisions at 30, 90, 180 days to learn from outcomes",
               tag: "PRO"
             },
             { 

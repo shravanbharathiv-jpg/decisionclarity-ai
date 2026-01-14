@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Check, Shield, Sparkles, Crown, BarChart3, Users, Brain, Lock } from 'lucide-react';
+import { Loader2, Check, Shield, Sparkles, Crown, BarChart3, Brain, Lock, TrendingUp } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface PaywallModalProps {
@@ -21,9 +21,9 @@ interface PaywallModalProps {
   onPaymentComplete: () => void;
 }
 
-const PRICING: Record<string, { price: string; period: string; priceId: string; savings?: string }> = {
-  monthly: { price: '£9.99', period: '/month', priceId: 'price_1SjfrMHXuJ6GDDWi0ppujkcu' },
-  yearly: { price: '£69.99', period: '/year', priceId: 'price_1SjfrSHXuJ6GDDWiWcRS1Vg3', savings: 'Save 42%' },
+const PRICING: Record<string, { price: string; period: string; priceId: string; savings?: string; trial?: string }> = {
+  monthly: { price: '£9.99', period: '/month', priceId: 'price_1SjfrMHXuJ6GDDWi0ppujkcu', trial: '7-day free trial' },
+  yearly: { price: '£69.99', period: '/year', priceId: 'price_1SjfrSHXuJ6GDDWiWcRS1Vg3', savings: 'Save 42%', trial: '7-day free trial' },
   lifetime: { price: '£99.99', period: 'one-time', priceId: 'price_1SjfrUHXuJ6GDDWi0krEVPGU', savings: 'Best Value' },
 };
 
@@ -65,7 +65,7 @@ export const PaywallModal = ({ open, onClose, onPaymentComplete }: PaywallModalP
     { icon: Sparkles, text: 'Scenario modeling (best/worst/likely)' },
     { icon: Brain, text: 'AI-powered bias detection' },
     { icon: BarChart3, text: 'Decision quality scoring (0-100)' },
-    { icon: Users, text: 'Share with trusted advisors' },
+    { icon: TrendingUp, text: 'Second-order thinking analysis' },
     { icon: Crown, text: 'Decision templates library' },
   ];
 
@@ -73,7 +73,7 @@ export const PaywallModal = ({ open, onClose, onPaymentComplete }: PaywallModalP
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader className="text-center">
           <div className="mx-auto mb-2">
             <Badge className="bg-primary/10 text-primary border-0">
@@ -81,13 +81,13 @@ export const PaywallModal = ({ open, onClose, onPaymentComplete }: PaywallModalP
               Premium Feature
             </Badge>
           </div>
-          <DialogTitle className="text-2xl">Unlock Full Access</DialogTitle>
-          <DialogDescription className="text-base">
+          <DialogTitle className="text-xl md:text-2xl">Unlock Full Access</DialogTitle>
+          <DialogDescription className="text-sm md:text-base">
             Continue with AI-powered scenario modeling and more
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
+        <div className="space-y-4 md:space-y-6 py-4">
           {/* Billing toggle */}
           <Tabs value={billingCycle} onValueChange={(v) => setBillingCycle(v as any)} className="w-full">
             <TabsList className="grid grid-cols-3 w-full">
@@ -101,20 +101,25 @@ export const PaywallModal = ({ open, onClose, onPaymentComplete }: PaywallModalP
           </Tabs>
 
           <div className="text-center">
-            <div className="text-4xl font-bold text-foreground">{currentPricing.price}</div>
+            <div className="text-3xl md:text-4xl font-bold text-foreground">{currentPricing.price}</div>
             <p className="text-sm text-muted-foreground mt-1">
               {currentPricing.period === 'one-time' ? 'One-time payment • Own forever' : `per ${currentPricing.period.replace('/', '')}`}
             </p>
+            {currentPricing.trial && (
+              <Badge variant="outline" className="mt-2 text-xs">
+                {currentPricing.trial}
+              </Badge>
+            )}
             {currentPricing.savings && (
-              <Badge variant="secondary" className="mt-2 bg-green-500/10 text-green-600">
+              <Badge variant="secondary" className="mt-2 ml-2 bg-green-500/10 text-green-600">
                 {currentPricing.savings}
               </Badge>
             )}
           </div>
 
-          <ul className="space-y-3">
+          <ul className="space-y-2 md:space-y-3">
             {features.map((feature, index) => (
-              <li key={index} className="flex items-center gap-3 text-sm">
+              <li key={index} className="flex items-center gap-3 text-xs md:text-sm">
                 <feature.icon className="h-4 w-4 text-primary flex-shrink-0" />
                 <span>{feature.text}</span>
               </li>

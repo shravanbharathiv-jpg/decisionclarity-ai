@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import LiveDecisionDemo from '@/components/landing/LiveDecisionDemo';
 import { 
   ArrowRight, Brain, Shield, Sparkles, Lock, TrendingUp, Clock, Target, 
   Zap, CheckCircle, AlertTriangle, Scale, Lightbulb, ChevronRight,
@@ -296,45 +297,24 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Real Example Section */}
-        <section className="py-16 md:py-24 bg-muted/30">
+        {/* Live Interactive Demo Section */}
+        <section className="py-16 md:py-24 bg-muted/30" id="demo">
           <div className="container mx-auto px-4 max-w-3xl">
             <div className="text-center mb-10">
-              <Badge variant="outline" className="mb-4">Real Example</Badge>
+              <Badge className="mb-4 bg-primary/10 text-primary border-0">
+                <Play className="h-3.5 w-3.5 mr-1.5" />
+                Try Before You Sign Up
+              </Badge>
               <h3 className="text-2xl md:text-3xl font-bold text-foreground">
-                How one decision changes everything
+                Experience Clarity in action
               </h3>
+              <p className="text-muted-foreground mt-3 max-w-lg mx-auto">
+                Walk through a real decision analysis—no account needed. 
+                See exactly how our AI helps you think clearer.
+              </p>
             </div>
 
-            <Card className="p-6 md:p-8 border-primary/20 bg-card">
-              <div className="space-y-6">
-                <div>
-                  <p className="text-sm font-medium text-primary mb-2">The Decision</p>
-                  <p className="text-lg text-foreground font-medium">"Should I leave my stable job to start a business?"</p>
-                </div>
-                
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="p-4 rounded-lg bg-muted/50">
-                    <p className="text-sm font-medium text-destructive mb-2">Without Clarity</p>
-                    <ul className="text-sm text-muted-foreground space-y-2">
-                      <li>• Months of indecision</li>
-                      <li>• Conflicting advice from friends</li>
-                      <li>• Missed the market window</li>
-                      <li>• Still wondering "what if"</li>
-                    </ul>
-                  </div>
-                  <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
-                    <p className="text-sm font-medium text-primary mb-2">With Clarity</p>
-                    <ul className="text-sm text-muted-foreground space-y-2">
-                      <li>• Spotted sunk cost fallacy</li>
-                      <li>• Modeled 3 scenarios</li>
-                      <li>• Made decision in 1 evening</li>
-                      <li>• Moved forward with confidence</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </Card>
+            <LiveDecisionDemo />
           </div>
         </section>
 

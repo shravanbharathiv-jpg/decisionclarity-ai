@@ -24,8 +24,9 @@ const Index = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // UPDATED: Logic now strictly routes to /dashboard or /auth
   const handleGetStarted = () => {
-      navigate(user ? '/dashboard' : '/auth');
+    navigate(user ? '/dashboard' : '/auth');
   };
 
   const decisionTypes = [
@@ -120,7 +121,6 @@ const Index = () => {
             </span>
           </div>
 
-          {/* Scroll indicator */}
           <div className="mt-12 animate-bounce">
             <ArrowDown className="h-5 w-5 mx-auto text-muted-foreground" />
           </div>
@@ -150,7 +150,6 @@ const Index = () => {
         <section className="py-16 md:py-24">
           <div className="container mx-auto px-4 max-w-5xl">
             <div className="grid md:grid-cols-2 gap-12 items-center">
-              {/* Problem */}
               <div className="space-y-6">
                 <Badge variant="outline" className="text-destructive border-destructive/30">
                   <AlertTriangle className="h-3.5 w-3.5 mr-1.5" />
@@ -174,7 +173,6 @@ const Index = () => {
                 </ul>
               </div>
 
-              {/* Solution */}
               <div className="space-y-6">
                 <Badge variant="outline" className="text-primary border-primary/30">
                   <Lightbulb className="h-3.5 w-3.5 mr-1.5" />
@@ -217,7 +215,6 @@ const Index = () => {
               </p>
             </div>
 
-            {/* Process Steps */}
             <div className="grid md:grid-cols-4 gap-4">
               {processSteps.map((step, index) => (
                 <Card 
@@ -245,7 +242,6 @@ const Index = () => {
               ))}
             </div>
 
-            {/* Demo CTA */}
             <div className="mt-10 text-center">
               <Button 
                 size="lg" 
@@ -395,7 +391,6 @@ const Index = () => {
         </div>
       </footer>
 
-      {/* CSS for scroll animation */}
       <style>{`
         @keyframes scroll {
           0% { transform: translateX(0); }

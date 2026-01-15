@@ -17,6 +17,7 @@ import Pricing from "./pages/Pricing";
 import Admin from "./pages/Admin";
 import Onboarding from "./pages/Onboarding";
 import Upgrade from "./pages/Upgrade";
+import EarlyAdopterPricing from "./pages/EarlyAdopterPricing";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => (
             <Route path="/profile" element={<Profile />} />
             <Route path="/compare" element={<Compare />} />
             <Route path="/pricing" element={<Pricing />} />
+            <Route path="/early-adopter" element={<EarlyAdopterPricing />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

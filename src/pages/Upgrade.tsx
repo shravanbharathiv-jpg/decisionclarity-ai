@@ -5,8 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Check, Loader2, ArrowLeft, Sparkles, Crown, Zap, X, Lock, BarChart3, Brain, TrendingUp } from 'lucide-react';
+import { Check, Loader2, ArrowLeft, Sparkles, Crown, Zap, X, Lock, BarChart3, Brain, TrendingUp, Gift, Shield } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const PLANS = {
@@ -44,30 +43,56 @@ const PLANS = {
   },
 };
 
-const PRICING = {
-  monthly: { price: '£9.99', period: '/month', priceId: 'price_1SjfrMHXuJ6GDDWi0ppujkcu', savings: null, trial: '7-day free trial' },
-  yearly: { price: '£69.99', period: '/year', priceId: 'price_1SjfrSHXuJ6GDDWiWcRS1Vg3', savings: 'Save 42%', trial: '7-day free trial' },
-  lifetime: { price: '£99.99', period: 'one-time', priceId: 'price_1SjfrUHXuJ6GDDWi0krEVPGU', savings: 'Best Value', trial: null },
-};
+const EARLY_ADOPTER_PLANS = [
+  {
+    id: 'monthly',
+    name: 'Monthly',
+    originalPrice: '£9.99',
+    price: '£4.99',
+    period: '/month',
+    priceId: 'price_1SjfrMHXuJ6GDDWi0ppujkcu',
+    discount: '50% OFF',
+  },
+  {
+    id: 'yearly',
+    name: 'Yearly',
+    originalPrice: '£69.99',
+    price: '£29.99',
+    period: '/year',
+    priceId: 'price_1SjfrSHXuJ6GDDWiWcRS1Vg3',
+    discount: '57% OFF',
+    savings: 'Save £40+',
+  },
+  {
+    id: 'lifetime',
+    name: 'Lifetime',
+    originalPrice: '£199.99',
+    price: '£49.99',
+    period: 'one-time',
+    priceId: 'price_1SjfrUHXuJ6GDDWi0krEVPGU',
+    discount: '75% OFF',
+    savings: 'Best Value',
+    popular: true,
+  },
+];
 
 const Upgrade = () => {
-  const { user, hasPaid, subscriptionTier } = useAuth();
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly' | 'lifetime'>('yearly');
-  const [loading, setLoading] = useState(false);
+  const { user, hasPaid } = useAuth();
+  const [selectedPlan, setSelectedPlan] = useState('lifetime');
+  const [loading, setLoading] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleSubscribe = async () => {
+  const handleSubscribe = async (priceId: string, planId: string) => {
     if (!user) {
       navigate('/auth');
       return;
     }
 
-    setLoading(true);
+    setLoading(planId);
 
     try {
-      const priceId = PRICING[billingCycle].priceId;
-      const functionName = billingCycle === 'lifetime' ? 'create-payment' : 'create-subscription';
+      const functionName = planId === 'lifetime' ? 'create-payment' : 'create-subscription';
       
       const { data, error } = await supabase.functions.invoke(functionName, {
         body: { priceId },
@@ -85,12 +110,12 @@ const Upgrade = () => {
         variant: 'destructive',
       });
     } finally {
-      setLoading(false);
+      setLoading(null);
     }
   };
 
   const handleManageSubscription = async () => {
-    setLoading(true);
+    setLoading('manage');
     try {
       const { data, error } = await supabase.functions.invoke('customer-portal');
       if (error) throw error;
@@ -104,11 +129,9 @@ const Upgrade = () => {
         variant: 'destructive',
       });
     } finally {
-      setLoading(false);
+      setLoading(null);
     }
   };
-
-  const currentPricing = PRICING[billingCycle];
 
   return (
     <div className="min-h-screen bg-background">
@@ -121,17 +144,19 @@ const Upgrade = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 md:py-12 max-w-4xl">
+      <main className="container mx-auto px-4 py-8 md:py-12 max-w-5xl">
         <div className="text-center space-y-4 mb-8">
-          <Badge className="bg-primary/10 text-primary border-0">
-            <Lock className="h-3 w-3 mr-1" />
-            Premium Feature
-          </Badge>
-          <h1 className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight">
-            Unlock Scenario Modeling & More
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
+            <Zap className="h-4 w-4 text-primary animate-pulse" />
+            <span className="text-sm font-medium text-primary">Early Adopter Exclusive</span>
+          </div>
+          
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
+            Unlock Full Access at Exclusive Prices
           </h1>
+          
           <p className="text-base md:text-lg text-muted-foreground max-w-xl mx-auto">
-            You've discovered a Pro feature. Upgrade to access the full decision-making system.
+            As an early adopter, you get <span className="text-primary font-semibold">lifetime discounts</span> that will never be offered again.
           </p>
         </div>
 
@@ -150,129 +175,115 @@ const Upgrade = () => {
           ))}
         </div>
 
-        {/* Billing toggle */}
-        <div className="flex justify-center mb-8 overflow-x-auto">
-          <Tabs value={billingCycle} onValueChange={(v) => setBillingCycle(v as any)}>
-            <TabsList className="grid grid-cols-3">
-              <TabsTrigger value="monthly" className="text-xs md:text-sm">Monthly</TabsTrigger>
-              <TabsTrigger value="yearly" className="relative text-xs md:text-sm">
-                Yearly
-                {PRICING.yearly.savings && (
-                  <Badge className="absolute -top-3 -right-3 text-[10px] bg-green-500 text-white">
-                    {PRICING.yearly.savings}
-                  </Badge>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="lifetime" className="relative text-xs md:text-sm">
-                Lifetime
-                {PRICING.lifetime.savings && (
-                  <Badge className="absolute -top-3 -right-3 text-[10px] bg-primary">
-                    {PRICING.lifetime.savings}
-                  </Badge>
-                )}
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
+        {/* Early Adopter Plans */}
+        <div className="grid md:grid-cols-3 gap-4 md:gap-6 mb-8">
+          {EARLY_ADOPTER_PLANS.map((plan) => (
+            <Card 
+              key={plan.id}
+              className={`relative cursor-pointer transition-all duration-300 ${
+                plan.popular 
+                  ? 'border-primary shadow-xl ring-2 ring-primary/20' 
+                  : 'border-border/50 hover:border-primary/50'
+              } ${selectedPlan === plan.id ? 'ring-2 ring-primary' : ''}`}
+              onClick={() => setSelectedPlan(plan.id)}
+            >
+              {/* Discount Badge */}
+              <div className="absolute -right-6 top-4 rotate-45 bg-destructive text-destructive-foreground px-8 py-1 text-xs font-bold">
+                {plan.discount}
+              </div>
 
-        {/* Plan comparison */}
-        <div className="grid md:grid-cols-2 gap-4 md:gap-6">
-          {/* Free plan */}
-          <Card className="border-border/50">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Zap className="h-5 w-5 text-muted-foreground" />
-                <CardTitle className="text-lg">{PLANS.free.name}</CardTitle>
-              </div>
-              <CardDescription>{PLANS.free.description}</CardDescription>
-              <div className="pt-2">
-                <span className="text-2xl md:text-3xl font-bold">£0</span>
-                <span className="text-muted-foreground"> forever</span>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2 md:space-y-3">
-                {PLANS.free.features.map((feature, i) => (
-                  <li key={i} className="flex items-center gap-2 text-xs md:text-sm">
-                    {feature.included ? (
-                      <Check className="h-4 w-4 text-primary shrink-0" />
-                    ) : (
-                      <X className="h-4 w-4 text-muted-foreground/50 shrink-0" />
-                    )}
-                    <span className={feature.included ? '' : 'text-muted-foreground/50'}>
-                      {feature.name}
+              {plan.popular && (
+                <div className="absolute top-0 left-0 right-0 bg-primary py-1.5 text-center rounded-t-lg">
+                  <span className="text-xs font-semibold text-primary-foreground">BEST VALUE</span>
+                </div>
+              )}
+
+              <CardHeader className={`text-center ${plan.popular ? 'pt-10' : 'pt-6'}`}>
+                <CardTitle className="text-lg">{plan.name}</CardTitle>
+                <div className="pt-2 space-y-1">
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-base text-muted-foreground line-through">
+                      {plan.originalPrice}
                     </span>
-                  </li>
-                ))}
-              </ul>
-              <Button 
-                variant="outline" 
-                className="w-full mt-6"
-                onClick={() => navigate('/dashboard')}
-              >
-                Continue Free
-              </Button>
-            </CardContent>
-          </Card>
+                    <span className="text-2xl font-bold text-foreground">{plan.price}</span>
+                  </div>
+                  <span className="text-sm text-muted-foreground">
+                    {plan.period === 'one-time' ? 'one-time' : plan.period}
+                  </span>
+                  {plan.savings && (
+                    <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
+                      {plan.savings}
+                    </Badge>
+                  )}
+                </div>
+              </CardHeader>
 
-          {/* Pro plan */}
-          <Card className="border-primary shadow-lg relative">
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-              <Badge className="bg-primary text-primary-foreground">Recommended</Badge>
-            </div>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Crown className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">{PLANS.pro.name}</CardTitle>
-              </div>
-              <CardDescription>{PLANS.pro.description}</CardDescription>
-              <div className="pt-2">
-                <span className="text-2xl md:text-3xl font-bold">{currentPricing.price}</span>
-                <span className="text-muted-foreground"> {currentPricing.period}</span>
-              </div>
-              {currentPricing.trial && (
-                <Badge variant="outline" className="mt-2 text-xs">
-                  {currentPricing.trial}
-                </Badge>
-              )}
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2 md:space-y-3">
-                {PLANS.pro.features.map((feature, i) => (
-                  <li key={i} className="flex items-center gap-2 text-xs md:text-sm">
-                    <Check className="h-4 w-4 text-primary shrink-0" />
-                    <span>{feature.name}</span>
-                  </li>
-                ))}
-              </ul>
-              {hasPaid ? (
+              <CardContent>
                 <Button 
-                  variant="outline" 
-                  className="w-full mt-6"
-                  onClick={handleManageSubscription}
-                  disabled={loading}
+                  className="w-full"
+                  variant={plan.popular ? 'default' : 'outline'}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSubscribe(plan.priceId, plan.id);
+                  }}
+                  disabled={loading === plan.id || hasPaid}
                 >
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Manage Subscription
+                  {loading === plan.id && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {hasPaid ? 'Already Subscribed' : (
+                    <>
+                      <Gift className="mr-2 h-4 w-4" />
+                      Claim This Price
+                    </>
+                  )}
                 </Button>
-              ) : (
-                <Button 
-                  className="w-full mt-6"
-                  onClick={handleSubscribe}
-                  disabled={loading}
-                >
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Upgrade to Pro
-                </Button>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
-        <div className="mt-8 text-center space-y-2">
-          <p className="text-xs md:text-sm text-muted-foreground">
-            ✓ 7-day money-back guarantee • ✓ Cancel anytime • ✓ Secure payment via Stripe
+        {/* What's included */}
+        <Card className="border-primary/20 bg-card mb-8">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Crown className="h-5 w-5 text-primary" />
+              What's Included in Pro
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-2 gap-3">
+              {PLANS.pro.features.map((feature, i) => (
+                <div key={i} className="flex items-center gap-2 text-sm">
+                  <Check className="h-4 w-4 text-primary shrink-0" />
+                  <span>{feature.name}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Trust elements */}
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 border border-green-500/20">
+            <Shield className="h-4 w-4 text-green-600" />
+            <span className="text-sm font-medium text-green-600">7-Day Money Back Guarantee</span>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Your early adopter price is <span className="text-foreground font-medium">locked in forever</span>—even if we raise prices later.
           </p>
+          <div className="flex flex-wrap items-center justify-center gap-6 pt-2 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <Check className="h-3.5 w-3.5 text-green-500" />
+              Secure Stripe checkout
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Check className="h-3.5 w-3.5 text-green-500" />
+              Cancel anytime
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Check className="h-3.5 w-3.5 text-green-500" />
+              Instant access
+            </span>
+          </div>
         </div>
       </main>
     </div>

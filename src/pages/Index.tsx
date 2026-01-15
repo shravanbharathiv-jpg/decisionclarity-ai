@@ -25,7 +25,7 @@ const Index = () => {
   }, []);
 
   const handleGetStarted = () => {
-    navigate(user ? '/dashboard' : '/onboarding');
+      navigate(user ? '/dashboard' : '/auth');
   };
 
   const decisionTypes = [

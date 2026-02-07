@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, LogOut, Calendar, CheckCircle, Clock, Loader2, GitCompare, Brain, Settings, CreditCard, Shield, Menu } from 'lucide-react';
+import { Plus, LogOut, Calendar, CheckCircle, Clock, Loader2, GitCompare, Brain, Settings, CreditCard, Shield, Menu, Zap } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import { DECISION_CATEGORIES } from '@/types/decision';
 import { useToast } from '@/hooks/use-toast';
@@ -218,6 +218,10 @@ const Dashboard = () => {
             <Button onClick={() => navigate('/decision/new')} size="lg" className="gap-2">
               <Plus className="h-5 w-5" />
               New decision
+            </Button>
+            <Button onClick={() => navigate('/decision/new?mode=quick')} variant="outline" size="lg" className="gap-2">
+              <Zap className="h-5 w-5" />
+              Quick decision
             </Button>
             {hasPaid && completedDecisions.length >= 2 && (
               <Button variant="outline" onClick={() => navigate('/compare')} size="lg" className="gap-2">

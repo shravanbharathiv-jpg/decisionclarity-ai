@@ -1,14 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import LiveDecisionDemo from '@/components/landing/LiveDecisionDemo';
+import ClarityGuide from '@/components/landing/ClarityGuide';
+import QuickDecisionWidget from '@/components/landing/QuickDecisionWidget';
 import { 
   ArrowRight, Brain, Shield, Sparkles, Lock, TrendingUp, Clock, Target, 
   Zap, CheckCircle, AlertTriangle, Scale, Lightbulb, ChevronRight,
-  Play, ArrowDown
+  Play, ArrowDown, Star, Users, Award, Heart
 } from 'lucide-react';
 
 const Index = () => {
@@ -16,6 +18,7 @@ const Index = () => {
   const { user } = useAuth();
   const [activeStep, setActiveStep] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
+  const demoRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsVisible(true);
@@ -25,9 +28,15 @@ const Index = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // UPDATED: Logic now strictly routes to /dashboard or /auth
   const handleGetStarted = () => {
     navigate(user ? '/dashboard' : '/auth');
+  };
+
+  const scrollToDemo = () => {
+    demoRef.current?.scrollIntoView({ 
+      behavior: 'smooth',
+      block: 'start'
+    });
   };
 
   const decisionTypes = [
@@ -66,14 +75,31 @@ const Index = () => {
     },
   ];
 
+  const trustReasons = [
+    { icon: Shield, text: 'Bank-level encryption', subtext: 'Your data is protected' },
+    { icon: Lock, text: 'Private by design', subtext: 'We never sell your data' },
+    { icon: Award, text: 'Research-backed', subtext: 'Based on decision science' },
+    { icon: Heart, text: 'Built for you', subtext: 'No ads, no distractions' },
+  ];
+
   return (
     <div className="min-h-screen bg-background overflow-hidden">
       <header className="border-b border-border/50 sticky top-0 bg-background/95 backdrop-blur-sm z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-foreground">Clarity</h1>
-          <Button variant="ghost" onClick={() => navigate(user ? '/dashboard' : '/auth')}>
-            {user ? 'Dashboard' : 'Sign in'}
-          </Button>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+              <Lightbulb className="h-4 w-4 text-primary" />
+            </div>
+            <h1 className="text-xl font-semibold text-foreground">Clarity</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={scrollToDemo} className="hidden sm:inline-flex">
+              Try Demo
+            </Button>
+            <Button variant="ghost" onClick={() => navigate(user ? '/dashboard' : '/auth')}>
+              {user ? 'Dashboard' : 'Sign in'}
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -100,29 +126,38 @@ const Index = () => {
             <Button 
               size="lg" 
               onClick={handleGetStarted} 
-              className="gap-2 text-base md:text-lg px-8 py-6 md:py-7 group transition-all duration-300 hover:scale-105"
+              className="gap-2 text-base md:text-lg px-8 py-6 md:py-7 group transition-all duration-300 hover:scale-105 shadow-lg"
             >
               Make your first decision free
               <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+            </Button>
+            <Button 
+              size="lg" 
+              variant="outline"
+              onClick={scrollToDemo} 
+              className="gap-2 text-base md:text-lg px-8 py-6 md:py-7 group transition-all duration-300"
+            >
+              <Play className="h-5 w-5" />
+              Try it yourself first
             </Button>
           </div>
           
           <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1.5">
-              <CheckCircle className="h-4 w-4 text-green-500" />
+              <CheckCircle className="h-4 w-4 text-primary" />
               No credit card required
             </span>
             <span className="flex items-center gap-1.5">
-              <Shield className="h-4 w-4 text-green-500" />
+              <Shield className="h-4 w-4 text-primary" />
               Private & encrypted
             </span>
             <span className="flex items-center gap-1.5">
-              <Clock className="h-4 w-4 text-green-500" />
+              <Clock className="h-4 w-4 text-primary" />
               Takes 10-15 minutes
             </span>
           </div>
 
-          <div className="mt-12 animate-bounce">
+          <div className="mt-12 animate-bounce cursor-pointer" onClick={scrollToDemo}>
             <ArrowDown className="h-5 w-5 mx-auto text-muted-foreground" />
           </div>
         </section>
@@ -141,6 +176,25 @@ const Index = () => {
                 >
                   <span className="mr-2">{item.emoji}</span>
                   <span className="text-sm font-medium text-foreground whitespace-nowrap">{item.text}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Trust Banner */}
+        <section className="py-8 border-y border-border/30 bg-muted/20">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+              {trustReasons.map((item, i) => (
+                <div key={i} className="flex items-center gap-3 justify-center md:justify-start">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <item.icon className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{item.text}</p>
+                    <p className="text-xs text-muted-foreground">{item.subtext}</p>
+                  </div>
                 </div>
               ))}
             </div>
@@ -200,8 +254,27 @@ const Index = () => {
           </div>
         </section>
 
+        {/* Quick Decision Widget */}
+        <section className="py-16 md:py-20 bg-muted/30">
+          <div className="container mx-auto px-4 max-w-lg">
+            <div className="text-center mb-8">
+              <Badge variant="outline" className="mb-4">
+                <Zap className="h-3.5 w-3.5 mr-1.5" />
+                For everyday choices
+              </Badge>
+              <h3 className="text-2xl md:text-3xl font-bold text-foreground">
+                Need a quick answer?
+              </h3>
+              <p className="text-muted-foreground mt-2">
+                Not every decision needs deep analysis. Try our 30-second quick decision tool.
+              </p>
+            </div>
+            <QuickDecisionWidget />
+          </div>
+        </section>
+
         {/* Interactive Process Demo */}
-        <section className="py-16 md:py-24 bg-muted/30">
+        <section className="py-16 md:py-24">
           <div className="container mx-auto px-4 max-w-4xl">
             <div className="text-center mb-12">
               <Badge variant="outline" className="mb-4">
@@ -247,7 +320,7 @@ const Index = () => {
               <Button 
                 size="lg" 
                 variant="outline" 
-                onClick={handleGetStarted}
+                onClick={scrollToDemo}
                 className="gap-2 group"
               >
                 Try it yourself—it's free
@@ -298,7 +371,7 @@ const Index = () => {
         </section>
 
         {/* Live Interactive Demo Section */}
-        <section className="py-16 md:py-24 bg-muted/30" id="demo">
+        <section ref={demoRef} className="py-16 md:py-24 bg-muted/30 scroll-mt-20" id="demo">
           <div className="container mx-auto px-4 max-w-3xl">
             <div className="text-center mb-10">
               <Badge className="mb-4 bg-primary/10 text-primary border-0">
@@ -337,7 +410,7 @@ const Index = () => {
             <Button 
               size="lg" 
               onClick={handleGetStarted} 
-              className="gap-2 text-lg px-10 py-7 group transition-all duration-300 hover:scale-105"
+              className="gap-2 text-lg px-10 py-7 group transition-all duration-300 hover:scale-105 shadow-lg"
             >
               Make your first decision now
               <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
@@ -349,15 +422,15 @@ const Index = () => {
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5">
-                <CheckCircle className="h-4 w-4 text-green-500" />
+                <CheckCircle className="h-4 w-4 text-primary" />
                 No credit card required
               </span>
               <span className="flex items-center gap-1.5">
-                <Shield className="h-4 w-4 text-green-500" />
+                <Shield className="h-4 w-4 text-primary" />
                 Bank-level encryption
               </span>
               <span className="flex items-center gap-1.5">
-                <Clock className="h-4 w-4 text-green-500" />
+                <Clock className="h-4 w-4 text-primary" />
                 7-day money back guarantee
               </span>
             </div>
@@ -370,6 +443,12 @@ const Index = () => {
           © {new Date().getFullYear()} Clarity. Make decisions with confidence.
         </div>
       </footer>
+
+      {/* Clarity Guide Mascot */}
+      <ClarityGuide 
+        onTryDemo={scrollToDemo}
+        onGetStarted={handleGetStarted}
+      />
 
       <style>{`
         @keyframes scroll {

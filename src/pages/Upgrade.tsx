@@ -14,8 +14,8 @@ const PLANS = {
     name: 'Free',
     description: 'Try Clarity basics',
     features: [
-      { name: 'Basic decision deconstruction', included: true },
-      { name: '3 decisions per month', included: true },
+      { name: '5 quick decisions per month', included: true },
+      { name: 'No deep decisions (Pro only)', included: false },
       { name: 'Scenario modeling', included: false },
       { name: 'AI bias detection', included: false },
       { name: 'Second-order thinking', included: false },

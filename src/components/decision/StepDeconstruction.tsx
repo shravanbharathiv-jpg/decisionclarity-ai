@@ -25,6 +25,7 @@ const questions = [
     key: 'time_horizon',
     question: 'What is the time horizon for this decision?',
     description: 'How far into the future are you looking?',
+    subtitle: "Let's set the stage 🎯",
     tip: '💡 Longer time horizons often favor bolder choices, while shorter ones need more certainty.',
     type: 'select',
     icon: '⏰',
@@ -39,6 +40,7 @@ const questions = [
     key: 'is_reversible',
     question: 'Is this decision reversible?',
     description: 'Can you undo or change course if needed?',
+    subtitle: "Understanding your safety net 🔄",
     tip: '💡 Reversible decisions deserve faster action. Irreversible ones merit deeper analysis.',
     type: 'select',
     icon: '🔄',
@@ -52,6 +54,7 @@ const questions = [
     key: 'do_nothing_outcome',
     question: 'What happens if you do nothing?',
     description: 'Describe the outcome of maintaining the status quo.',
+    subtitle: "The hidden choice most people ignore 🤔",
     tip: '💡 "Doing nothing" is also a choice with its own consequences. Make it conscious.',
     type: 'text',
     icon: '🤷',
@@ -61,6 +64,7 @@ const questions = [
     key: 'biggest_fear',
     question: 'What are you most afraid of?',
     description: 'Be honest about your deepest concern.',
+    subtitle: "Courage starts with honesty 💪",
     tip: '💡 Naming your fears reduces their power. What you can name, you can address.',
     type: 'text',
     icon: '😰',
@@ -70,6 +74,7 @@ const questions = [
     key: 'future_regret',
     question: 'What would future-you regret more?',
     description: 'Taking action and it not working out, or not taking action at all?',
+    subtitle: "Almost there — the final piece 🔮",
     tip: '💡 Research shows we regret inaction more than action. What would 80-year-old you say?',
     type: 'text',
     icon: '🔮',
@@ -221,7 +226,8 @@ export const StepDeconstruction = ({ decision, onUpdate, onNext, hasPaid }: Step
             <Badge variant="secondary" className="w-fit mx-auto mb-3">
               {question.icon} Question {currentQuestion + 1}
             </Badge>
-            <CardTitle className="text-lg">{decision.title}</CardTitle>
+            <p className="text-sm text-primary font-medium">{question.subtitle}</p>
+            <CardTitle className="text-lg mt-1">{decision.title}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             {insight ? (

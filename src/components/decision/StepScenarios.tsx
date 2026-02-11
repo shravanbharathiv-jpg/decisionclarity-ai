@@ -303,13 +303,20 @@ export const StepScenarios = ({ decision, onUpdate, onNext }: StepScenariosProps
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Scenario Header */}
-            <div className={`p-4 rounded-lg ${scenario.bgColor} text-center`}>
+            <div className={`p-4 rounded-lg ${scenario.bgColor} text-center animate-in fade-in slide-in-from-bottom-2 duration-500`}>
               <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full bg-background mb-3`}>
                 <ScenarioIcon className={`h-6 w-6 ${scenario.color}`} />
               </div>
               <h3 className="text-lg font-semibold">{scenario.title}</h3>
               <p className="text-sm text-muted-foreground">{scenario.subtitle}</p>
             </div>
+
+            {/* Encouragement */}
+            <p className="text-xs text-center text-primary font-medium">
+              {currentStep === 0 && "Dream big but stay realistic — what's the upside? 🚀"}
+              {currentStep === 1 && "Be honest with yourself — what will probably happen? 🎯"}
+              {currentStep === 2 && "Face it head-on — knowing the downside gives you power ⚡"}
+            </p>
 
             {/* Quick Prompts */}
             <div className="space-y-2">

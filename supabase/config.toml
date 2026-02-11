@@ -45,3 +45,6 @@ verify_jwt = true
 
 [functions.score-decision]
 verify_jwt = true
+
+[functions.clair-chat]
+verify_jwt = false

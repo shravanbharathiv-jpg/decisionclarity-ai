@@ -16,13 +16,15 @@ const PLANS = [
     period: 'forever',
     description: 'Try the basics',
     features: [
+      { text: '1 deep decision per month', included: true },
+      { text: '5 quick decisions per month', included: true },
       { text: 'Basic decision deconstruction', included: true },
-      { text: '3 decisions per month', included: true },
       { text: 'Scenario modeling', included: false },
       { text: 'AI bias detection', included: false },
       { text: 'Second-order thinking', included: false },
       { text: 'AI decision scoring', included: false },
       { text: 'Decision templates', included: false },
+      { text: 'Comparison mode', included: false },
     ],
     icon: Zap,
     popular: false,
@@ -36,7 +38,8 @@ const PLANS = [
     priceId: 'price_1SjfrMHXuJ6GDDWi0ppujkcu',
     features: [
       { text: 'Everything in Free', included: true },
-      { text: 'Unlimited decisions', included: true },
+      { text: 'Unlimited deep decisions', included: true },
+      { text: 'Unlimited quick decisions', included: true },
       { text: 'Scenario modeling', included: true },
       { text: 'AI bias detection', included: true },
       { text: 'Second-order thinking', included: true },
@@ -51,11 +54,11 @@ const PLANS = [
     name: 'Pro Yearly',
     price: '£69.99',
     period: '/year',
-    description: 'Save 42% — Best for commitment',
+    description: 'Save 42% vs monthly',
     priceId: 'price_1SjfrSHXuJ6GDDWiWcRS1Vg3',
     features: [
       { text: 'Everything in Pro Monthly', included: true },
-      { text: '5 months free', included: true },
+      { text: 'Save over £49 per year', included: true },
       { text: 'Early access to new features', included: true },
     ],
     icon: Crown,
@@ -78,6 +81,7 @@ const PLANS = [
     icon: Crown,
     popular: true,
     savings: 'Best Value',
+    trial: '7-day free trial',
   },
 ];
 
@@ -279,9 +283,6 @@ const Pricing = () => {
           </div>
           <p className="text-xs md:text-sm text-muted-foreground">
             ✓ Full refund within 7 days, no questions asked • ✓ Cancel anytime • ✓ Secure payment via Stripe
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Questions? Contact support@clarity-app.com
           </p>
         </div>
       </main>

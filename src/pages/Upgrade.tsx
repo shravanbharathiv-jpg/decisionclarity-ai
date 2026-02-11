@@ -61,7 +61,7 @@ const EARLY_ADOPTER_PLANS = [
     period: '/year',
     priceId: 'price_1SjfrSHXuJ6GDDWiWcRS1Vg3',
     discount: '57% OFF',
-    savings: 'Save £40+',
+    savings: 'Save £30+',
   },
   {
     id: 'lifetime',

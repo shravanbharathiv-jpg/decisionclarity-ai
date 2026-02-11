@@ -308,17 +308,14 @@ export const StepBiasCheck = ({ decision, onUpdate, onNext }: StepBiasCheckProps
             <CardTitle className="text-xl">{decision.title}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="text-center p-6 rounded-lg bg-orange-500/10 animate-in fade-in slide-in-from-bottom-2 duration-500">
+            <div className="text-center p-6 rounded-lg bg-orange-500/10">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-background mb-4">
                 <Brain className="h-8 w-8 text-orange-500" />
               </div>
               <h3 className="text-lg font-semibold mb-2">Cognitive Bias Check</h3>
               <p className="text-sm text-muted-foreground">
-                We all have blind spots. This is where Clarity shines — let's find
-                the biases influencing your thinking so you can decide with full awareness.
-              </p>
-              <p className="text-xs text-primary font-medium mt-3">
-                This step alone has saved users from costly mistakes 🛡️
+                We all have blind spots. Let's identify any biases that might be 
+                influencing your decision-making.
               </p>
             </div>
 

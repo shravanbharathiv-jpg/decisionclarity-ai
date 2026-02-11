@@ -218,17 +218,10 @@ export const StepDeconstruction = ({ decision, onUpdate, onNext, hasPaid }: Step
 
         <Card className="border-border/50 shadow-lg">
           <CardHeader className="text-center pb-2">
-            <Badge variant="secondary" className="w-fit mx-auto mb-3 animate-in fade-in duration-300">
-              {question.icon} Question {currentQuestion + 1} of {questions.length}
+            <Badge variant="secondary" className="w-fit mx-auto mb-3">
+              {question.icon} Question {currentQuestion + 1}
             </Badge>
             <CardTitle className="text-lg">{decision.title}</CardTitle>
-            <p className="text-xs text-muted-foreground mt-1">
-              {currentQuestion === 0 && "Let's start with the basics"}
-              {currentQuestion === 1 && "Understanding flexibility"}
-              {currentQuestion === 2 && "The cost of inaction"}
-              {currentQuestion === 3 && "Confronting fears removes their power"}
-              {currentQuestion === 4 && "Almost there — the regret test"}
-            </p>
           </CardHeader>
           <CardContent className="space-y-6">
             {insight ? (
@@ -369,19 +362,10 @@ export const StepDeconstruction = ({ decision, onUpdate, onNext, hasPaid }: Step
                   </p>
                 )}
 
-                {/* Encouragement + keyboard hint */}
-                <div className="text-center space-y-1">
-                  <p className="text-xs text-primary font-medium">
-                    {completedCount === 0 && "You've taken the first step 💪"}
-                    {completedCount === 1 && "Great start — keep going!"}
-                    {completedCount === 2 && "Halfway there — you're doing great"}
-                    {completedCount === 3 && "Almost done — the clarity is coming"}
-                    {completedCount === 4 && "One more answer to unlock your insights ✨"}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Press <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">Enter</kbd> to continue
-                  </p>
-                </div>
+                {/* Keyboard hint */}
+                <p className="text-xs text-center text-muted-foreground">
+                  Press <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">Enter</kbd> to continue
+                </p>
               </>
             )}
           </CardContent>

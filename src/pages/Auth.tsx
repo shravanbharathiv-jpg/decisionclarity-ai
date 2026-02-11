@@ -20,7 +20,6 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
-  const [showVerifyEmail, setShowVerifyEmail] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -90,14 +89,28 @@ const Auth = () => {
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/onboarding`,
+            emailRedirectTo: `${window.location.origin}/dashboard`,
           },
         });
         if (error) throw error;
 
-        // Built-in auth system sends confirmation email automatically
-        // Show email verification message instead of navigating
-        setShowVerifyEmail(true);
+        // Send welcome email
+        if (signUpData.user) {
+          try {
+            await supabase.functions.invoke('send-welcome-email', {
+              body: { email, appUrl: window.location.origin },
+            });
+          } catch (emailError) {
+            console.error('Failed to send welcome email:', emailError);
+          }
+        }
+
+        toast({
+          title: 'Welcome to Clarity! 🎉',
+          description: "Let's personalize your experience.",
+        });
+        // Redirect new signups to onboarding
+        navigate('/onboarding');
       }
     } catch (error: any) {
       let message = error.message;
@@ -115,32 +128,6 @@ const Auth = () => {
       setLoading(false);
     }
   };
-
-  if (showVerifyEmail) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-4">
-        <div className="w-full max-w-md text-center space-y-6">
-          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-            <Loader2 className="h-8 w-8 text-primary" />
-          </div>
-          <h2 className="text-2xl font-semibold text-foreground">Check your email</h2>
-          <p className="text-muted-foreground">
-            We've sent a verification link to <span className="font-medium text-foreground">{email}</span>. 
-            Click the link to verify your account and start your onboarding.
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Didn't receive it? Check your spam folder or{' '}
-            <button 
-              onClick={() => setShowVerifyEmail(false)} 
-              className="text-primary underline underline-offset-2"
-            >
-              try again
-            </button>
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">

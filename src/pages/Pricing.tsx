@@ -16,8 +16,8 @@ const PLANS = [
     period: 'forever',
     description: 'Try the basics',
     features: [
-      { text: '1 deep decision per month', included: true },
       { text: '5 quick decisions per month', included: true },
+      { text: 'No deep decisions (Pro only)', included: false },
       { text: 'Basic decision deconstruction', included: true },
       { text: 'Scenario modeling', included: false },
       { text: 'AI bias detection', included: false },

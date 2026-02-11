@@ -95,17 +95,7 @@ const Auth = () => {
         });
         if (error) throw error;
 
-        // Send welcome email
-        if (signUpData.user) {
-          try {
-            await supabase.functions.invoke('send-welcome-email', {
-              body: { email, appUrl: window.location.origin },
-            });
-          } catch (emailError) {
-            console.error('Failed to send welcome email:', emailError);
-          }
-        }
-
+        // Built-in auth system sends confirmation email automatically
         // Show email verification message instead of navigating
         setShowVerifyEmail(true);
       }

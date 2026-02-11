@@ -26,6 +26,19 @@ const Auth = () => {
 
   useEffect(() => {
     if (user) {
+      // Check if this is a new user who hasn't completed onboarding
+      const hasCompletedOnboarding = localStorage.getItem('onboarding-completed');
+      if (!hasCompletedOnboarding) {
+        // Check if the user just signed up (account created very recently)
+        const createdAt = user.created_at ? new Date(user.created_at) : null;
+        const now = new Date();
+        const isNewUser = createdAt && (now.getTime() - createdAt.getTime()) < 5 * 60 * 1000; // within 5 min
+        
+        if (isNewUser) {
+          navigate('/onboarding');
+          return;
+        }
+      }
       navigate('/dashboard');
     }
   }, [user, navigate]);
@@ -76,7 +89,7 @@ const Auth = () => {
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/onboarding`,
+            emailRedirectTo: `${window.location.origin}/dashboard`,
           },
         });
         if (error) throw error;
@@ -94,7 +107,7 @@ const Auth = () => {
 
         toast({
           title: 'Welcome to Clarity! 🎉',
-          description: "Let's personalize your experience with a quick survey.",
+          description: "Let's personalize your experience.",
         });
         // Redirect new signups to onboarding
         navigate('/onboarding');

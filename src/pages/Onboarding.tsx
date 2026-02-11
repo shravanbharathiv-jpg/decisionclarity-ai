@@ -52,9 +52,10 @@ const Onboarding = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Store survey answers for personalization
+    // Store survey answers and mark onboarding complete
       localStorage.setItem('onboardingSurvey', JSON.stringify(surveyAnswers));
-      navigate('/pricing');
+      localStorage.setItem('onboarding-completed', 'true');
+      navigate('/dashboard');
     }
   };
 
@@ -65,7 +66,8 @@ const Onboarding = () => {
   };
 
   const handleSkip = () => {
-    navigate('/auth');
+    localStorage.setItem('onboarding-completed', 'true');
+    navigate('/dashboard');
   };
 
   const updateSurvey = (key: keyof SurveyAnswers, value: string) => {

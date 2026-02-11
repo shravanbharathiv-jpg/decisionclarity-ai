@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import LiveDecisionDemo from '@/components/landing/LiveDecisionDemo';
-import ClarityGuide from '@/components/landing/ClarityGuide';
 import QuickDecisionWidget from '@/components/landing/QuickDecisionWidget';
 import { 
   ArrowRight, Brain, Shield, Sparkles, Lock, TrendingUp, Clock, Target, 
@@ -444,11 +443,7 @@ const Index = () => {
         </div>
       </footer>
 
-      {/* Clarity Guide Mascot */}
-      <ClarityGuide 
-        onTryDemo={scrollToDemo}
-        onGetStarted={handleGetStarted}
-      />
+      {/* Clair Agent is now global via App.tsx */}
 
       <style>{`
         @keyframes scroll {

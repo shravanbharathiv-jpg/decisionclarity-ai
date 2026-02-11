@@ -98,7 +98,7 @@ const LiveDecisionDemo = () => {
   };
 
   const handleGetStarted = () => {
-    navigate(user ? '/new-decision' : '/auth');
+    navigate(user ? '/decision/new' : '/auth');
   };
 
   const stepIndicators = [

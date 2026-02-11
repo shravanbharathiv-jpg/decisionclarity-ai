@@ -19,15 +19,16 @@ const EARLY_ADOPTER_PLANS = [
     priceId: 'price_1SjfrMHXuJ6GDDWi0ppujkcu',
     discount: '50% OFF',
     features: [
-      'Unlimited decisions',
+      'Unlimited deep decisions',
+      'Unlimited quick decisions',
       'AI scenario modeling',
       'Cognitive bias detection',
       'Second-order thinking',
-      'Decision templates',
-      'Decision scoring',
+      'Decision templates & scoring',
     ],
     icon: Sparkles,
     popular: false,
+    trial: '7-day free trial',
   },
   {
     id: 'yearly',
@@ -40,13 +41,14 @@ const EARLY_ADOPTER_PLANS = [
     discount: '57% OFF',
     features: [
       'Everything in Pro Monthly',
-      '7+ months FREE savings',
+      'Save over £30 per year',
       'Early access to new features',
       'Priority support',
     ],
     icon: Crown,
     popular: true,
     savings: 'Save £30+',
+    trial: '7-day free trial',
   },
   {
     id: 'lifetime',
@@ -66,6 +68,7 @@ const EARLY_ADOPTER_PLANS = [
     icon: Gift,
     popular: false,
     savings: 'Save £150',
+    trial: '7-day free trial',
   },
 ];
 
@@ -118,7 +121,6 @@ const EarlyAdopterPricing = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8 md:py-12 max-w-5xl">
-        {/* Special Header */}
         <div className="text-center space-y-4 mb-8">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
             <Zap className="h-4 w-4 text-primary animate-pulse" />
@@ -145,14 +147,12 @@ const EarlyAdopterPricing = () => {
           </div>
         </div>
 
-        {/* Countdown urgency */}
         <div className="text-center mb-10">
           <p className="text-sm text-muted-foreground">
             🔥 <span className="text-foreground font-medium">These prices are locked in forever</span> when you subscribe today
           </p>
         </div>
 
-        {/* Plans Grid */}
         <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
           {EARLY_ADOPTER_PLANS.map((plan) => {
             const Icon = plan.icon;
@@ -166,7 +166,6 @@ const EarlyAdopterPricing = () => {
                     : 'border-border/50 hover:border-primary/50'
                 }`}
               >
-                {/* Discount Badge */}
                 <div className="absolute -right-8 top-6 rotate-45 bg-destructive text-destructive-foreground px-10 py-1 text-xs font-bold">
                   {plan.discount}
                 </div>
@@ -213,7 +212,7 @@ const EarlyAdopterPricing = () => {
                   </ul>
                   
                   <Button 
-                    className={`w-full ${plan.popular ? '' : 'variant-outline'}`}
+                    className={`w-full`}
                     variant={plan.popular ? 'default' : 'outline'}
                     size="lg"
                     onClick={() => handleSubscribe(plan.priceId, plan.id)}
@@ -232,7 +231,6 @@ const EarlyAdopterPricing = () => {
           })}
         </div>
 
-        {/* Trust Elements */}
         <div className="mt-12 text-center space-y-4">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 border border-green-500/20">
             <Shield className="h-4 w-4 text-green-600" />

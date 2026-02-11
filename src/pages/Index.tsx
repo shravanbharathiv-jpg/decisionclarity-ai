@@ -435,11 +435,11 @@ const Index = () => {
             </div>
           </div>
         </section>
-      </main>
+      </main> 
 
       <footer className="border-t border-border/50 py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} Clarity. Make decisions with confidence.
+          © {new Date().getFullYear()} Clarity. Make decisions with confidence. \n     Made by Shravan
         </div>
       </footer>
 

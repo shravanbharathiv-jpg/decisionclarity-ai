@@ -1,17 +1,20 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
-  MessageCircle, X, Send, Loader2, Lightbulb, Sparkles, Minimize2
+  MessageCircle, X, Send, Loader2, Lightbulb, Sparkles, Minimize2, Trash2
 } from 'lucide-react';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
 }
+
+const SESSION_KEY = 'clair_chat_messages';
+const GREETED_KEY = 'clair_has_greeted';
 
 const CONTEXT_SUGGESTIONS: Record<string, string[]> = {
   '/': ['How does Clarity work?', 'What makes this different?', 'Is my data private?'],
@@ -22,12 +25,23 @@ const CONTEXT_SUGGESTIONS: Record<string, string[]> = {
   '/profile': ['How does my bias profile work?', 'What are decision patterns?'],
 };
 
+const loadMessages = (): Message[] => {
+  try {
+    const stored = sessionStorage.getItem(SESSION_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch { return []; }
+};
+
+const saveMessages = (messages: Message[]) => {
+  try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(messages)); } catch {}
+};
+
 const ClairAgent = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(loadMessages);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [hasGreeted, setHasGreeted] = useState(false);
+  const [hasGreeted, setHasGreeted] = useState(() => sessionStorage.getItem(GREETED_KEY) === 'true');
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const location = useLocation();
@@ -35,6 +49,10 @@ const ClairAgent = () => {
   const currentPath = location.pathname;
   const basePath = currentPath.startsWith('/decision/') ? '/decision/new' : currentPath;
   const suggestions = CONTEXT_SUGGESTIONS[basePath] || CONTEXT_SUGGESTIONS['/'];
+
+  useEffect(() => {
+    saveMessages(messages);
+  }, [messages]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -51,11 +69,13 @@ const ClairAgent = () => {
   const handleOpen = () => {
     setIsOpen(true);
     if (!hasGreeted) {
-      setMessages([{
+      const greeting: Message = {
         role: 'assistant',
         content: "Hey! I'm Clair, your personal decision guide. 💡 Ask me anything about the app, decision-making, or how to get the most out of Clarity. I'm always here."
-      }]);
+      };
+      setMessages([greeting]);
       setHasGreeted(true);
+      sessionStorage.setItem(GREETED_KEY, 'true');
     }
   };
 
@@ -94,6 +114,14 @@ const ClairAgent = () => {
     sendMessage(input);
   };
 
+  const clearChat = () => {
+    setMessages([]);
+    setHasGreeted(false);
+    sessionStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(GREETED_KEY);
+    setIsOpen(false);
+  };
+
   if (!isOpen) {
     return (
       <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50">
@@ -104,7 +132,6 @@ const ClairAgent = () => {
         >
           <div className="absolute inset-0 rounded-full bg-primary/30 animate-ping opacity-20" />
           <Lightbulb className="h-6 w-6" />
-          {/* Tooltip */}
           <span className="absolute right-full mr-3 bg-card border border-border rounded-lg px-3 py-2 text-sm text-foreground whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity shadow-lg pointer-events-none">
             Ask Clair anything 💡
           </span>
@@ -131,16 +158,10 @@ const ClairAgent = () => {
             </div>
           </div>
           <div className="flex items-center gap-1">
-            <button
-              onClick={() => setIsOpen(false)}
-              className="p-1.5 rounded-full hover:bg-muted transition-colors"
-            >
+            <button onClick={() => setIsOpen(false)} className="p-1.5 rounded-full hover:bg-muted transition-colors">
               <Minimize2 className="h-4 w-4 text-muted-foreground" />
             </button>
-            <button
-              onClick={() => { setIsOpen(false); setMessages([]); setHasGreeted(false); }}
-              className="p-1.5 rounded-full hover:bg-muted transition-colors"
-            >
+            <button onClick={clearChat} className="p-1.5 rounded-full hover:bg-muted transition-colors">
               <X className="h-4 w-4 text-muted-foreground" />
             </button>
           </div>
@@ -149,17 +170,12 @@ const ClairAgent = () => {
         {/* Messages */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3" style={{ minHeight: '200px' }}>
           {messages.map((msg, i) => (
-            <div
-              key={i}
-              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              <div
-                className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
-                  msg.role === 'user'
-                    ? 'bg-primary text-primary-foreground rounded-br-md'
-                    : 'bg-muted text-foreground rounded-bl-md'
-                }`}
-              >
+            <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
+                msg.role === 'user'
+                  ? 'bg-primary text-primary-foreground rounded-br-md'
+                  : 'bg-muted text-foreground rounded-bl-md'
+              }`}>
                 {msg.content}
               </div>
             </div>
@@ -181,11 +197,7 @@ const ClairAgent = () => {
         {messages.length <= 1 && (
           <div className="px-4 pb-2 flex flex-wrap gap-1.5 shrink-0">
             {suggestions.map((s, i) => (
-              <button
-                key={i}
-                onClick={() => sendMessage(s)}
-                className="text-xs px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-              >
+              <button key={i} onClick={() => sendMessage(s)} className="text-xs px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
                 {s}
               </button>
             ))}
@@ -203,12 +215,7 @@ const ClairAgent = () => {
               className="flex-1 text-sm h-10 rounded-full"
               disabled={isLoading}
             />
-            <Button
-              type="submit"
-              size="icon"
-              className="rounded-full h-10 w-10 shrink-0"
-              disabled={!input.trim() || isLoading}
-            >
+            <Button type="submit" size="icon" className="rounded-full h-10 w-10 shrink-0" disabled={!input.trim() || isLoading}>
               <Send className="h-4 w-4" />
             </Button>
           </div>

@@ -56,12 +56,6 @@ const Index = () => {
     { icon: Lock, title: 'Commit & Act', description: 'Lock in your decision and end the deliberation', active: activeStep === 3 },
   ];
 
-  const testimonials = [
-    { name: 'Sarah K.', role: 'Product Manager', text: 'Clarity helped me decide to leave my toxic job. Best decision I ever made. The bias detection caught my fear of change.', rating: 5 },
-    { name: 'James R.', role: 'Entrepreneur', text: 'I was stuck for months on whether to bootstrap or seek funding. 15 minutes with Clarity and I had total clarity.', rating: 5 },
-    { name: 'Priya M.', role: 'Graduate Student', text: 'Used it to choose between PhD programs. The scenario modeling showed me things I never considered.', rating: 5 },
-  ];
-
   const faqs = [
     { q: 'What is a decision making app?', a: 'A decision making app like Clarity helps you systematically analyze complex life decisions using AI-powered frameworks, bias detection, and scenario modeling — instead of relying on gut feeling or endless pros/cons lists.' },
     { q: 'How does Clarity help me make better decisions?', a: 'Clarity uses a proven 4-step process: 1) Deconstruct your decision into clear components, 2) Model best/worst/likely scenarios with AI, 3) Detect cognitive biases like confirmation bias and sunk cost fallacy, 4) Lock in your decision with confidence.' },

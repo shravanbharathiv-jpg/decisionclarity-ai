@@ -525,7 +525,7 @@ const Index = () => {
           <div className="container mx-auto px-4 text-center max-w-2xl">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
               <Zap className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium text-primary">Only {10 - signupCount} early adopter spots remaining</span>
+              <span className="text-sm font-medium text-primary">Limited early adopter spots available</span>
             </div>
             
             <h2 className="text-2xl md:text-4xl font-bold mb-4 text-foreground">

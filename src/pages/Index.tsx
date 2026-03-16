@@ -110,8 +110,8 @@ const Index = () => {
         {/* Hero Section — keyword-rich */}
         <section className={`container mx-auto px-4 py-12 md:py-20 text-center max-w-4xl transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <Badge className="mb-6 bg-primary/10 text-primary border-0 px-4 py-1.5">
-            <Star className="h-3.5 w-3.5 mr-1.5" />
-            #1 AI Decision Making App — Rated 4.9/5
+            <Zap className="h-3.5 w-3.5 mr-1.5" />
+            AI-Powered Decision Making App
           </Badge>
           
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-foreground tracking-tight leading-tight">

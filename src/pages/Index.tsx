@@ -17,7 +17,6 @@ const Index = () => {
   const { user } = useAuth();
   const [activeStep, setActiveStep] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
-  const [signupCount, setSignupCount] = useState(0);
   const demoRef = useRef<HTMLDivElement>(null);
   const faqRef = useRef<HTMLDivElement>(null);
 
@@ -26,14 +25,7 @@ const Index = () => {
     const interval = setInterval(() => {
       setActiveStep((prev) => (prev + 1) % 4);
     }, 3000);
-    // Simulate live counter
-    const countInterval = setInterval(() => {
-      setSignupCount(prev => {
-        if (prev < 7) return prev + 1;
-        return prev;
-      });
-    }, 4000);
-    return () => { clearInterval(interval); clearInterval(countInterval); };
+    return () => clearInterval(interval);
   }, []);
 
   const handleGetStarted = () => {
@@ -62,12 +54,6 @@ const Index = () => {
     { icon: Sparkles, title: 'Analyze Scenarios', description: 'AI models best, worst & most likely outcomes', active: activeStep === 1 },
     { icon: Shield, title: 'Detect Biases', description: 'Catch 180+ cognitive blind spots automatically', active: activeStep === 2 },
     { icon: Lock, title: 'Commit & Act', description: 'Lock in your decision and end the deliberation', active: activeStep === 3 },
-  ];
-
-  const testimonials = [
-    { name: 'Sarah K.', role: 'Product Manager', text: 'Clarity helped me decide to leave my toxic job. Best decision I ever made. The bias detection caught my fear of change.', rating: 5 },
-    { name: 'James R.', role: 'Entrepreneur', text: 'I was stuck for months on whether to bootstrap or seek funding. 15 minutes with Clarity and I had total clarity.', rating: 5 },
-    { name: 'Priya M.', role: 'Graduate Student', text: 'Used it to choose between PhD programs. The scenario modeling showed me things I never considered.', rating: 5 },
   ];
 
   const faqs = [
@@ -106,9 +92,9 @@ const Index = () => {
 
       <main>
         {/* Urgency Banner */}
-        <div className="bg-primary text-primary-foreground py-2 text-center text-sm font-medium animate-pulse">
+        <div className="bg-primary text-primary-foreground py-2 text-center text-sm font-medium">
           <span className="inline-flex items-center gap-2">
-            🔥 <strong>{10 - signupCount} spots left</strong> — First 10 users get 1 deep decision FREE
+            🚀 First 10 users get 1 deep decision <strong>completely FREE</strong>
             <Button variant="secondary" size="sm" className="ml-2 h-7 text-xs" onClick={handleGetStarted}>
               Claim yours
             </Button>
@@ -118,8 +104,8 @@ const Index = () => {
         {/* Hero Section — keyword-rich */}
         <section className={`container mx-auto px-4 py-12 md:py-20 text-center max-w-4xl transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <Badge className="mb-6 bg-primary/10 text-primary border-0 px-4 py-1.5">
-            <Star className="h-3.5 w-3.5 mr-1.5" />
-            #1 AI Decision Making App — Rated 4.9/5
+            <Zap className="h-3.5 w-3.5 mr-1.5" />
+            AI-Powered Decision Making App
           </Badge>
           
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-foreground tracking-tight leading-tight">
@@ -169,8 +155,8 @@ const Index = () => {
               Results in 10 minutes
             </span>
             <span className="flex items-center gap-1.5">
-              <Users className="h-4 w-4 text-primary" />
-              Join 2,000+ decision makers
+              <Sparkles className="h-4 w-4 text-primary" />
+              Based on decision science research
             </span>
           </div>
 
@@ -179,23 +165,21 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Social Proof Bar */}
-        <section className="py-4 bg-muted/50 border-y border-border/30" aria-label="Social proof">
+        {/* Value Proposition Bar */}
+        <section className="py-4 bg-muted/50 border-y border-border/30" aria-label="Key benefits">
           <div className="container mx-auto px-4 flex flex-wrap items-center justify-center gap-6 md:gap-10 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1.5">
-              <div className="flex -space-x-2">
-                {['bg-primary', 'bg-accent', 'bg-destructive', 'bg-primary/70'].map((bg, i) => (
-                  <div key={i} className={`w-7 h-7 rounded-full ${bg} border-2 border-background flex items-center justify-center text-[10px] text-primary-foreground font-bold`}>
-                    {['S', 'J', 'P', 'M'][i]}
-                  </div>
-                ))}
-              </div>
-              <span className="font-medium">2,147 decisions made this week</span>
-            </div>
-            <div className="flex items-center gap-1">
-              {[...Array(5)].map((_, i) => <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />)}
-              <span className="ml-1 font-medium">4.9/5 average rating</span>
-            </div>
+            <span className="flex items-center gap-1.5 font-medium">
+              <Brain className="h-4 w-4 text-primary" />
+              180+ cognitive biases detected
+            </span>
+            <span className="flex items-center gap-1.5 font-medium">
+              <Target className="h-4 w-4 text-primary" />
+              Structured decision frameworks
+            </span>
+            <span className="flex items-center gap-1.5 font-medium">
+              <TrendingUp className="h-4 w-4 text-primary" />
+              See effects months ahead
+            </span>
           </div>
         </section>
 
@@ -428,35 +412,8 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Testimonials */}
-        <section className="py-16 md:py-24 bg-muted/30" aria-label="What users say about Clarity">
-          <div className="container mx-auto px-4 max-w-5xl">
-            <div className="text-center mb-12">
-              <h2 className="text-2xl md:text-3xl font-bold text-foreground">
-                Real People, Real Decisions, Real Results
-              </h2>
-              <p className="mt-3 text-muted-foreground">See how Clarity helped others stop overthinking</p>
-            </div>
-            <div className="grid md:grid-cols-3 gap-6">
-              {testimonials.map((t, i) => (
-                <Card key={i} className="p-6 border-border/50">
-                  <div className="flex gap-0.5 mb-3">
-                    {[...Array(t.rating)].map((_, j) => (
-                      <Star key={j} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    ))}
-                  </div>
-                  <blockquote className="text-sm text-muted-foreground mb-4 leading-relaxed italic">
-                    "{t.text}"
-                  </blockquote>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">{t.name}</p>
-                    <p className="text-xs text-muted-foreground">{t.role}</p>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
+
+
 
         {/* Live Interactive Demo Section */}
         <section ref={demoRef} className="py-16 md:py-24 scroll-mt-20" id="demo" aria-label="Interactive decision making demo">
@@ -541,7 +498,7 @@ const Index = () => {
           <div className="container mx-auto px-4 text-center max-w-2xl">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
               <Zap className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium text-primary">Only {10 - signupCount} early adopter spots remaining</span>
+              <span className="text-sm font-medium text-primary">Limited early adopter spots available</span>
             </div>
             
             <h2 className="text-2xl md:text-4xl font-bold mb-4 text-foreground">
@@ -549,7 +506,7 @@ const Index = () => {
             </h2>
             
             <p className="text-lg text-muted-foreground mb-8 max-w-lg mx-auto">
-              Stop second-guessing. Stop losing sleep. Join thousands making decisions they're proud of — start completely free.
+              Stop second-guessing. Stop losing sleep. Start making decisions you're proud of — completely free to begin.
             </p>
             
             <Button 
@@ -569,15 +526,15 @@ const Index = () => {
             <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5">
                 <CheckCircle className="h-4 w-4 text-primary" />
-                2,000+ users
+                Free to start
               </span>
               <span className="flex items-center gap-1.5">
                 <Shield className="h-4 w-4 text-primary" />
                 Bank-level encryption
               </span>
               <span className="flex items-center gap-1.5">
-                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                4.9/5 rating
+                <Award className="h-4 w-4 text-primary" />
+                Research-backed frameworks
               </span>
             </div>
           </div>
@@ -592,7 +549,7 @@ const Index = () => {
                 <Lightbulb className="h-5 w-5 text-primary" />
                 <span className="font-semibold text-foreground">Clarity</span>
               </div>
-              <p className="text-sm text-muted-foreground">The #1 AI-powered decision making app. Make better decisions with confidence.</p>
+              <p className="text-sm text-muted-foreground">AI-powered decision making app. Make better decisions with structured frameworks.</p>
             </div>
             <div>
               <h4 className="font-semibold text-foreground mb-3 text-sm">Product</h4>

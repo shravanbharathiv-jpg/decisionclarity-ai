@@ -533,7 +533,7 @@ const Index = () => {
             </h2>
             
             <p className="text-lg text-muted-foreground mb-8 max-w-lg mx-auto">
-              Stop second-guessing. Stop losing sleep. Join thousands making decisions they're proud of — start completely free.
+              Stop second-guessing. Stop losing sleep. Start making decisions you're proud of — completely free to begin.
             </p>
             
             <Button 

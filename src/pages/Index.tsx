@@ -576,7 +576,7 @@ const Index = () => {
                 <Lightbulb className="h-5 w-5 text-primary" />
                 <span className="font-semibold text-foreground">Clarity</span>
               </div>
-              <p className="text-sm text-muted-foreground">The #1 AI-powered decision making app. Make better decisions with confidence.</p>
+              <p className="text-sm text-muted-foreground">AI-powered decision making app. Make better decisions with structured frameworks.</p>
             </div>
             <div>
               <h4 className="font-semibold text-foreground mb-3 text-sm">Product</h4>

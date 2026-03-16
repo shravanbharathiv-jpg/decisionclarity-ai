@@ -412,35 +412,8 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Testimonials */}
-        <section className="py-16 md:py-24 bg-muted/30" aria-label="What users say about Clarity">
-          <div className="container mx-auto px-4 max-w-5xl">
-            <div className="text-center mb-12">
-              <h2 className="text-2xl md:text-3xl font-bold text-foreground">
-                Real People, Real Decisions, Real Results
-              </h2>
-              <p className="mt-3 text-muted-foreground">See how Clarity helped others stop overthinking</p>
-            </div>
-            <div className="grid md:grid-cols-3 gap-6">
-              {testimonials.map((t, i) => (
-                <Card key={i} className="p-6 border-border/50">
-                  <div className="flex gap-0.5 mb-3">
-                    {[...Array(t.rating)].map((_, j) => (
-                      <Star key={j} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    ))}
-                  </div>
-                  <blockquote className="text-sm text-muted-foreground mb-4 leading-relaxed italic">
-                    "{t.text}"
-                  </blockquote>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">{t.name}</p>
-                    <p className="text-xs text-muted-foreground">{t.role}</p>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
+
+
 
         {/* Live Interactive Demo Section */}
         <section ref={demoRef} className="py-16 md:py-24 scroll-mt-20" id="demo" aria-label="Interactive decision making demo">

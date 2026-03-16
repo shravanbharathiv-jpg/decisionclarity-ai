@@ -161,8 +161,8 @@ const Index = () => {
               Results in 10 minutes
             </span>
             <span className="flex items-center gap-1.5">
-              <Users className="h-4 w-4 text-primary" />
-              Join 2,000+ decision makers
+              <Sparkles className="h-4 w-4 text-primary" />
+              Based on decision science research
             </span>
           </div>
 

@@ -98,9 +98,9 @@ const Index = () => {
 
       <main>
         {/* Urgency Banner */}
-        <div className="bg-primary text-primary-foreground py-2 text-center text-sm font-medium animate-pulse">
+        <div className="bg-primary text-primary-foreground py-2 text-center text-sm font-medium">
           <span className="inline-flex items-center gap-2">
-            🔥 <strong>{10 - signupCount} spots left</strong> — First 10 users get 1 deep decision FREE
+            🚀 First 10 users get 1 deep decision <strong>completely FREE</strong>
             <Button variant="secondary" size="sm" className="ml-2 h-7 text-xs" onClick={handleGetStarted}>
               Claim yours
             </Button>

@@ -553,15 +553,15 @@ const Index = () => {
             <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5">
                 <CheckCircle className="h-4 w-4 text-primary" />
-                2,000+ users
+                Free to start
               </span>
               <span className="flex items-center gap-1.5">
                 <Shield className="h-4 w-4 text-primary" />
                 Bank-level encryption
               </span>
               <span className="flex items-center gap-1.5">
-                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                4.9/5 rating
+                <Award className="h-4 w-4 text-primary" />
+                Research-backed frameworks
               </span>
             </div>
           </div>

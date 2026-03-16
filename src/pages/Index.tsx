@@ -171,23 +171,21 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Social Proof Bar */}
-        <section className="py-4 bg-muted/50 border-y border-border/30" aria-label="Social proof">
+        {/* Value Proposition Bar */}
+        <section className="py-4 bg-muted/50 border-y border-border/30" aria-label="Key benefits">
           <div className="container mx-auto px-4 flex flex-wrap items-center justify-center gap-6 md:gap-10 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1.5">
-              <div className="flex -space-x-2">
-                {['bg-primary', 'bg-accent', 'bg-destructive', 'bg-primary/70'].map((bg, i) => (
-                  <div key={i} className={`w-7 h-7 rounded-full ${bg} border-2 border-background flex items-center justify-center text-[10px] text-primary-foreground font-bold`}>
-                    {['S', 'J', 'P', 'M'][i]}
-                  </div>
-                ))}
-              </div>
-              <span className="font-medium">2,147 decisions made this week</span>
-            </div>
-            <div className="flex items-center gap-1">
-              {[...Array(5)].map((_, i) => <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />)}
-              <span className="ml-1 font-medium">4.9/5 average rating</span>
-            </div>
+            <span className="flex items-center gap-1.5 font-medium">
+              <Brain className="h-4 w-4 text-primary" />
+              180+ cognitive biases detected
+            </span>
+            <span className="flex items-center gap-1.5 font-medium">
+              <Target className="h-4 w-4 text-primary" />
+              Structured decision frameworks
+            </span>
+            <span className="flex items-center gap-1.5 font-medium">
+              <TrendingUp className="h-4 w-4 text-primary" />
+              See effects months ahead
+            </span>
           </div>
         </section>
 

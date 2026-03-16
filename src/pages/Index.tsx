@@ -17,7 +17,6 @@ const Index = () => {
   const { user } = useAuth();
   const [activeStep, setActiveStep] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
-  const [signupCount, setSignupCount] = useState(0);
   const demoRef = useRef<HTMLDivElement>(null);
   const faqRef = useRef<HTMLDivElement>(null);
 
@@ -26,14 +25,7 @@ const Index = () => {
     const interval = setInterval(() => {
       setActiveStep((prev) => (prev + 1) % 4);
     }, 3000);
-    // Simulate live counter
-    const countInterval = setInterval(() => {
-      setSignupCount(prev => {
-        if (prev < 7) return prev + 1;
-        return prev;
-      });
-    }, 4000);
-    return () => { clearInterval(interval); clearInterval(countInterval); };
+    return () => clearInterval(interval);
   }, []);
 
   const handleGetStarted = () => {

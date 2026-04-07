@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Check, Shield, Sparkles, Crown, BarChart3, Brain, Lock, TrendingUp, Gift, Zap } from 'lucide-react';
+import { Loader2, Check, Shield, Sparkles, Crown, BarChart3, Brain, Lock, TrendingUp, Gift, Zap, ArrowRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface PaywallModalProps {
@@ -89,11 +89,11 @@ export const PaywallModal = ({ open, onClose, onPaymentComplete }: PaywallModalP
   };
 
   const features = [
-    { icon: Sparkles, text: 'Scenario modeling (best/worst/likely)' },
-    { icon: Brain, text: 'AI-powered bias detection' },
+    { icon: Sparkles, text: 'Unlimited deep decision analyses' },
+    { icon: Brain, text: 'AI-powered bias detection (180+ biases)' },
     { icon: BarChart3, text: 'Decision quality scoring (0-100)' },
-    { icon: TrendingUp, text: 'Second-order thinking analysis' },
-    { icon: Crown, text: 'Decision templates library' },
+    { icon: TrendingUp, text: 'Second-order thinking & scenario modeling' },
+    { icon: Crown, text: 'AI predictions & decision templates' },
   ];
 
   const currentPricing = EARLY_ADOPTER_PRICING[billingCycle];
@@ -102,18 +102,23 @@ export const PaywallModal = ({ open, onClose, onPaymentComplete }: PaywallModalP
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader className="text-center">
-          <div className="mx-auto mb-2 flex gap-2">
-            <Badge className="bg-primary/10 text-primary border-0">
-              <Zap className="h-3 w-3 mr-1" />
-              Early Adopter
-            </Badge>
-            <Badge className="bg-destructive text-destructive-foreground border-0">
-              {currentPricing.discount}
-            </Badge>
+          <div className="mx-auto mb-3">
+            <div className="w-14 h-14 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-3">
+              <Sparkles className="h-7 w-7 text-primary" />
+            </div>
+            <div className="flex gap-2 justify-center">
+              <Badge className="bg-primary/10 text-primary border-0">
+                <Zap className="h-3 w-3 mr-1" />
+                Early Adopter
+              </Badge>
+              <Badge className="bg-destructive text-destructive-foreground border-0">
+                {currentPricing.discount}
+              </Badge>
+            </div>
           </div>
-          <DialogTitle className="text-xl md:text-2xl">Exclusive Early Adopter Pricing</DialogTitle>
+          <DialogTitle className="text-xl md:text-2xl">Unlock Unlimited Clarity</DialogTitle>
           <DialogDescription className="text-sm md:text-base">
-            Lock in these prices forever—they'll never be offered again
+            Make every decision with confidence — your thinking deserves the best tools available
           </DialogDescription>
         </DialogHeader>
 
@@ -169,16 +174,21 @@ export const PaywallModal = ({ open, onClose, onPaymentComplete }: PaywallModalP
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <>
-                <Gift className="h-4 w-4" />
-                Claim Early Adopter Price
+                <ArrowRight className="h-4 w-4" />
+                Unlock Unlimited Clarity
               </>
             )}
           </Button>
 
-          <p className="text-xs text-center text-muted-foreground flex items-center justify-center gap-1">
-            <Shield className="h-3 w-3" />
-            7-day money-back guarantee • Price locked forever
-          </p>
+          <div className="space-y-1.5">
+            <p className="text-xs text-center text-muted-foreground flex items-center justify-center gap-1">
+              <Shield className="h-3 w-3" />
+              7-day money-back guarantee • Price locked forever
+            </p>
+            <p className="text-xs text-center text-muted-foreground">
+              Early adopter pricing — these prices won't be available forever
+            </p>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

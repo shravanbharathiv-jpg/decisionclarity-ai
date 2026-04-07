@@ -9,7 +9,8 @@ import QuickDecisionWidget from '@/components/landing/QuickDecisionWidget';
 import { 
   ArrowRight, Brain, Shield, Sparkles, Lock, TrendingUp, Clock, Target, 
   Zap, CheckCircle, AlertTriangle, Scale, Lightbulb, ChevronRight,
-  Play, ArrowDown, Star, Users, Award, Heart, MessageCircle, BarChart3
+  Play, ArrowDown, Star, Users, Award, Heart, MessageCircle, BarChart3,
+  Eye, EyeOff, Fingerprint, Server, BookOpen, Compass
 } from 'lucide-react';
 
 const Index = () => {
@@ -63,6 +64,10 @@ const Index = () => {
     { q: 'What types of decisions can I analyze?', a: 'Clarity works for any major life decision: career changes, buying vs renting, relationship decisions, investment choices, university selection, relocation, health decisions, and more. If it keeps you up at night, Clarity can help.' },
     { q: 'What cognitive biases does Clarity detect?', a: 'Clarity\'s AI detects 180+ cognitive biases including confirmation bias, sunk cost fallacy, anchoring bias, availability heuristic, loss aversion, status quo bias, and many more that silently affect your decision making.' },
     { q: 'How is this different from a pros and cons list?', a: 'Pros/cons lists are flat and biased by whatever you think of first. Clarity uses structured decision science frameworks, AI-powered scenario modeling, cognitive bias detection, and second-order thinking to reveal what you can\'t see on your own.' },
+    { q: 'Is my data private and secure?', a: 'Absolutely. Your decisions are encrypted with bank-level security. We never sell your data, never share it with third parties, and never use it for advertising. Your thinking space is completely private — only you can see your decisions.' },
+    { q: 'Who is Clair, the AI decision coach?', a: 'Clair is your personal AI decision guide built into Clarity. She\'s trained in decision science, cognitive bias research, and structured thinking frameworks. She helps you think through decisions, answers questions about the app, and provides guidance at every step — available 24/7 in the chat widget.' },
+    { q: 'Can I try Clarity before signing up?', a: 'Yes! You can try our live interactive demo right on this page — no account needed. You can also use the quick decision tool to get an instant AI analysis of any everyday choice, completely free.' },
+    { q: 'What is second-order thinking?', a: 'Second-order thinking means asking "and then what?" after your initial decision. Most people only think about immediate consequences. Clarity\'s AI helps you see ripple effects 6, 12, and 24 months into the future — the hidden impacts that most people miss.' },
   ];
 
   return (
@@ -101,7 +106,7 @@ const Index = () => {
           </span>
         </div>
 
-        {/* Hero Section — keyword-rich */}
+        {/* Hero Section */}
         <section className={`container mx-auto px-4 py-12 md:py-20 text-center max-w-4xl transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <Badge className="mb-6 bg-primary/10 text-primary border-0 px-4 py-1.5">
             <Zap className="h-3.5 w-3.5 mr-1.5" />
@@ -183,7 +188,7 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Decision Types Carousel — SEO-rich */}
+        {/* Decision Types Carousel */}
         <section className="py-12 bg-muted/30 overflow-hidden" aria-label="Types of decisions Clarity helps with">
           <div className="container mx-auto px-4 mb-6 text-center">
             <h2 className="text-lg font-semibold text-foreground mb-1">Decisions Clarity Helps You Make</h2>
@@ -283,6 +288,77 @@ const Index = () => {
           </div>
         </section>
 
+        {/* Meet Clair Section */}
+        <section className="py-16 md:py-24 bg-primary/5" aria-label="Meet Clair your AI decision coach">
+          <div className="container mx-auto px-4 max-w-5xl">
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              <div className="space-y-6">
+                <Badge variant="outline" className="border-primary/30 text-primary">
+                  <MessageCircle className="h-3.5 w-3.5 mr-1.5" />
+                  Your AI Decision Coach
+                </Badge>
+                <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+                  Meet Clair — Your Personal Thinking Partner
+                </h2>
+                <p className="text-muted-foreground leading-relaxed">
+                  Clair is an AI decision coach trained in decision science, cognitive bias research, 
+                  and structured thinking frameworks. She's available 24/7 to help you think through 
+                  any decision — big or small.
+                </p>
+                <ul className="space-y-3">
+                  {[
+                    'Helps you think through decisions step by step',
+                    'Explains cognitive biases in simple, clear language',
+                    'Provides personalised guidance based on your situation',
+                    'Available anytime — just click the chat bubble',
+                    'Never judges, never rushes — your pace, your privacy',
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm text-muted-foreground">
+                      <CheckCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Button onClick={handleGetStarted} className="gap-2 group">
+                  Chat with Clair — free
+                  <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </div>
+
+              <div className="relative">
+                <Card className="p-6 border-primary/20 bg-card shadow-xl">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+                      <Lightbulb className="h-5 w-5 text-primary-foreground" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm text-foreground">Clair</p>
+                      <p className="text-xs text-muted-foreground">AI Decision Coach • Always available</p>
+                    </div>
+                    <div className="ml-auto w-2.5 h-2.5 bg-green-500 rounded-full" />
+                  </div>
+                  <div className="space-y-3">
+                    <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-2.5 text-sm text-foreground">
+                      I notice you're weighing a career change. That's a big one! Let's break it down together. 
+                      What's driving the urge to switch — is it the role itself or the environment? 💡
+                    </div>
+                    <div className="bg-primary text-primary-foreground rounded-2xl rounded-br-md px-4 py-2.5 text-sm ml-auto max-w-[80%]">
+                      Both, honestly. I feel stuck but scared to leave.
+                    </div>
+                    <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-2.5 text-sm text-foreground">
+                      That tension is completely normal — it's actually a sign you're thinking carefully. 
+                      Let's separate the fear from the facts. What would change if you stayed another year?
+                    </div>
+                  </div>
+                </Card>
+                <div className="absolute -bottom-3 -right-3 bg-primary/10 border border-primary/20 rounded-full px-3 py-1.5 text-xs font-medium text-primary">
+                  Available 24/7 ✨
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Quick Decision Widget */}
         <section className="py-16 md:py-20 bg-muted/30" aria-label="Quick decision analysis tool">
           <div className="container mx-auto px-4 max-w-lg">
@@ -314,7 +390,7 @@ const Index = () => {
                 The 4-Step Decision Making Framework
               </h2>
               <p className="mt-3 text-muted-foreground max-w-xl mx-auto">
-                Used by thousands to transform chaotic overthinking into clear, confident action
+                A structured approach to transform chaotic overthinking into clear, confident action
               </p>
             </div>
 
@@ -356,7 +432,7 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Features / What Makes Us Different */}
+        {/* Features */}
         <section className="container mx-auto px-4 py-16 md:py-24 max-w-5xl" aria-label="AI decision making features">
           <div className="text-center mb-12">
             <h2 className="text-2xl md:text-3xl font-bold text-foreground">
@@ -367,36 +443,12 @@ const Index = () => {
           
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              { 
-                icon: Target, 
-                title: 'AI Cognitive Bias Detection', 
-                description: 'Your brain has 180+ cognitive biases. Clarity\'s AI catches confirmation bias, sunk cost fallacy, anchoring, and more — before you commit.' 
-              },
-              { 
-                icon: TrendingUp, 
-                title: 'Second-Order Thinking', 
-                description: '"And then what?" See the ripple effects of your choices 6, 12, and 24 months into the future. Think like a chess grandmaster.' 
-              },
-              { 
-                icon: Scale, 
-                title: 'Scenario Modeling', 
-                description: 'Best case, worst case, most likely case. Know exactly what you\'re signing up for before you commit to any path.' 
-              },
-              { 
-                icon: BarChart3, 
-                title: 'Decision Quality Score', 
-                description: 'Get a 0-100 score on your decision quality. Track how your decision making improves over time with data-driven insights.' 
-              },
-              { 
-                icon: MessageCircle, 
-                title: 'AI Decision Coach (Clair)', 
-                description: 'Chat with Clair, your personal AI decision coach. Ask questions, explore options, and get guidance at every step.' 
-              },
-              { 
-                icon: Zap, 
-                title: 'Quick & Deep Modes', 
-                description: 'Quick mode for everyday choices in 30 seconds. Deep mode for life-changing decisions with full AI analysis and scenario modeling.' 
-              },
+              { icon: Target, title: 'AI Cognitive Bias Detection', description: 'Your brain has 180+ cognitive biases. Clarity\'s AI catches confirmation bias, sunk cost fallacy, anchoring, and more — before you commit.' },
+              { icon: TrendingUp, title: 'Second-Order Thinking', description: '"And then what?" See the ripple effects of your choices 6, 12, and 24 months into the future. Think like a chess grandmaster.' },
+              { icon: Scale, title: 'Scenario Modeling', description: 'Best case, worst case, most likely case. Know exactly what you\'re signing up for before you commit to any path.' },
+              { icon: BarChart3, title: 'Decision Quality Score', description: 'Get a 0-100 score on your decision quality. Track how your decision making improves over time with data-driven insights.' },
+              { icon: MessageCircle, title: 'AI Decision Coach (Clair)', description: 'Chat with Clair, your personal AI decision coach. Ask questions, explore options, and get guidance at every step.' },
+              { icon: Zap, title: 'Quick & Deep Modes', description: 'Quick mode for everyday choices in 30 seconds. Deep mode for life-changing decisions with full AI analysis and scenario modeling.' },
             ].map((feature, index) => (
               <Card 
                 key={index} 
@@ -412,8 +464,43 @@ const Index = () => {
           </div>
         </section>
 
-
-
+        {/* Privacy & Security Deep Dive */}
+        <section className="py-16 md:py-24 bg-muted/30" aria-label="Privacy and data security">
+          <div className="container mx-auto px-4 max-w-4xl">
+            <div className="text-center mb-12">
+              <Badge variant="outline" className="mb-4">
+                <Fingerprint className="h-3.5 w-3.5 mr-1.5" />
+                Your Privacy Matters
+              </Badge>
+              <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+                Your Decisions Are Yours Alone
+              </h2>
+              <p className="mt-3 text-muted-foreground max-w-xl mx-auto">
+                Clarity is built as a private thinking space. Here's exactly how we protect you.
+              </p>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-6">
+              {[
+                { icon: Lock, title: 'End-to-end encrypted', desc: 'All your decisions and data are encrypted at rest and in transit using bank-level encryption standards.' },
+                { icon: EyeOff, title: 'We never sell your data', desc: 'Your personal data and decisions are never sold, shared, or used for advertising. Period. No exceptions.' },
+                { icon: Fingerprint, title: 'Only you can access it', desc: 'Your decisions are tied to your account and protected by row-level security. No one else — not even us — can read them.' },
+                { icon: Heart, title: 'No ads, no trackers', desc: 'Clarity has zero advertising, zero third-party trackers, and zero data brokers. We make money from subscriptions, not your data.' },
+              ].map((item, i) => (
+                <Card key={i} className="p-6 border-border/50">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <item.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-foreground mb-1">{item.title}</h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
 
         {/* Live Interactive Demo Section */}
         <section ref={demoRef} className="py-16 md:py-24 scroll-mt-20" id="demo" aria-label="Interactive decision making demo">
@@ -435,7 +522,7 @@ const Index = () => {
           </div>
         </section>
 
-        {/* FAQ Section — massive SEO value */}
+        {/* FAQ Section */}
         <section ref={faqRef} className="py-16 md:py-24 bg-muted/30" aria-label="Frequently asked questions about decision making">
           <div className="container mx-auto px-4 max-w-3xl">
             <div className="text-center mb-12">
@@ -543,13 +630,13 @@ const Index = () => {
 
       <footer className="border-t border-border/50 py-10 bg-muted/20" role="contentinfo">
         <div className="container mx-auto px-4">
-          <div className="grid sm:grid-cols-3 gap-8 mb-8">
+          <div className="grid sm:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <Lightbulb className="h-5 w-5 text-primary" />
                 <span className="font-semibold text-foreground">Clarity</span>
               </div>
-              <p className="text-sm text-muted-foreground">AI-powered decision making app. Make better decisions with structured frameworks.</p>
+              <p className="text-sm text-muted-foreground">AI-powered decision making app. Make better decisions with structured frameworks, bias detection, and scenario modeling.</p>
             </div>
             <div>
               <h4 className="font-semibold text-foreground mb-3 text-sm">Product</h4>
@@ -568,9 +655,18 @@ const Index = () => {
                 <li>Life Decision Framework</li>
               </ul>
             </div>
+            <div>
+              <h4 className="font-semibold text-foreground mb-3 text-sm">Why Clarity</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>AI Bias Detection</li>
+                <li>Scenario Modeling</li>
+                <li>Private & Encrypted</li>
+                <li>Meet Clair (AI Coach)</li>
+              </ul>
+            </div>
           </div>
           <div className="border-t border-border/50 pt-6 text-center text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Clarity — AI Decision Making App. Make decisions with confidence.
+            © {new Date().getFullYear()} Clarity — AI Decision Making App. Your decisions are private, encrypted, and never sold.
           </div>
         </div>
       </footer>

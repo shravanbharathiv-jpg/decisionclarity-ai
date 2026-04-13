@@ -394,7 +394,7 @@ const Index = () => {
               </p>
             </div>
 
-            <div className="grid md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
               {processSteps.map((step, index) => (
                 <Card 
                   key={index}
@@ -441,7 +441,7 @@ const Index = () => {
             <p className="mt-3 text-muted-foreground">Powered by decision science research and advanced AI</p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
             {[
               { icon: Target, title: 'AI Cognitive Bias Detection', description: 'Your brain has 180+ cognitive biases. Clarity\'s AI catches confirmation bias, sunk cost fallacy, anchoring, and more — before you commit.' },
               { icon: TrendingUp, title: 'Second-Order Thinking', description: '"And then what?" See the ripple effects of your choices 6, 12, and 24 months into the future. Think like a chess grandmaster.' },

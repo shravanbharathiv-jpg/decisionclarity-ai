@@ -344,7 +344,7 @@ const NewDecision = () => {
               Describe the choice you need to make. Be as specific as possible.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 sm:px-6">
             {hasPaid && (
               <div className="mb-6">
                 <Button 
@@ -420,7 +420,7 @@ const NewDecision = () => {
                 />
               </div>
 
-              <Button type="submit" className="w-full gap-2" disabled={loading}>
+              <Button type="submit" className="w-full gap-2 h-11 sm:h-12 text-sm" disabled={loading}>
                 {loading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (

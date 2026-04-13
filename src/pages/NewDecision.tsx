@@ -172,10 +172,10 @@ const NewDecision = () => {
     return (
       <div className="min-h-screen bg-background">
         <header className="border-b border-border/50">
-          <div className="container mx-auto px-4 py-4">
+          <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
             <button
               onClick={() => navigate('/dashboard')}
-              className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+              className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to dashboard
@@ -183,21 +183,21 @@ const NewDecision = () => {
           </div>
         </header>
 
-        <main className="container mx-auto px-4 py-12 max-w-xl">
+        <main className="container mx-auto px-3 sm:px-4 py-6 sm:py-12 max-w-xl">
           <Card className="border-primary/20">
-            <CardHeader className="text-center">
+            <CardHeader className="text-center px-4 sm:px-6">
               <Badge className="w-fit mx-auto mb-2 bg-primary/10 text-primary border-0">
                 <Zap className="h-3 w-3 mr-1.5" />
                 Quick Decision
               </Badge>
-              <CardTitle className="text-2xl">Make a fast choice</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-xl sm:text-2xl">Make a fast choice</CardTitle>
+              <CardDescription className="text-xs sm:text-sm">
                 For everyday decisions that don't need deep analysis. Get an answer in 30 seconds.
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-4 sm:px-6">
               {!quickResult ? (
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                   <div className="space-y-2">
                     <Label htmlFor="quick-title">What are you deciding?</Label>
                     <Input
@@ -205,14 +205,14 @@ const NewDecision = () => {
                       placeholder="e.g., Which restaurant for dinner?"
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
-                      className="text-base"
+                      className="text-sm sm:text-base"
                       autoFocus
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="option-a">Option A</Label>
+                      <Label htmlFor="option-a" className="text-xs sm:text-sm">Option A</Label>
                       <Input
                         id="option-a"
                         placeholder="First choice"
@@ -221,7 +221,7 @@ const NewDecision = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="option-b">Option B</Label>
+                      <Label htmlFor="option-b" className="text-xs sm:text-sm">Option B</Label>
                       <Input
                         id="option-b"
                         placeholder="Second choice"
@@ -234,7 +234,7 @@ const NewDecision = () => {
                   <Button 
                     onClick={handleQuickAnalysis}
                     disabled={!quickOptionA.trim() || !quickOptionB.trim() || isAnalyzing}
-                    className="w-full gap-2"
+                    className="w-full gap-2 h-11 sm:h-12"
                   >
                     {isAnalyzing ? (
                       <>
@@ -255,7 +255,7 @@ const NewDecision = () => {
                   </div>
 
                   <div className="border-t border-border/50 pt-4">
-                    <p className="text-sm text-center text-muted-foreground">
+                    <p className="text-xs sm:text-sm text-center text-muted-foreground">
                       Need deeper analysis?{' '}
                       <button 
                         onClick={convertToFullDecision}
@@ -267,39 +267,39 @@ const NewDecision = () => {
                   </div>
                 </div>
               ) : (
-                <div className="space-y-6 animate-fade-in">
-                  <div className="p-6 rounded-lg bg-primary/10 border border-primary/20 text-center">
+                <div className="space-y-4 sm:space-y-6 animate-fade-in">
+                  <div className="p-4 sm:p-6 rounded-lg bg-primary/10 border border-primary/20 text-center">
                     <p className="text-xs text-muted-foreground mb-2">Quick recommendation</p>
-                    <p className="text-2xl font-bold text-foreground">{quickResult.recommendation}</p>
+                    <p className="text-xl sm:text-2xl font-bold text-foreground">{quickResult.recommendation}</p>
                     <div className="flex items-center justify-center gap-2 mt-3">
-                      <div className="h-2 w-32 rounded-full bg-muted overflow-hidden">
+                      <div className="h-2 w-24 sm:w-32 rounded-full bg-muted overflow-hidden">
                         <div 
                           className="h-full bg-primary rounded-full transition-all duration-500"
                           style={{ width: `${quickResult.confidence}%` }}
                         />
                       </div>
-                      <span className="text-sm text-muted-foreground">{quickResult.confidence}% confidence</span>
+                      <span className="text-xs sm:text-sm text-muted-foreground">{quickResult.confidence}%</span>
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-lg bg-muted/50 border border-border/50">
-                    <p className="text-sm text-muted-foreground">{quickResult.reason}</p>
+                  <div className="p-3 sm:p-4 rounded-lg bg-muted/50 border border-border/50">
+                    <p className="text-xs sm:text-sm text-muted-foreground">{quickResult.reason}</p>
                   </div>
 
-                  <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                    <p className="text-xs text-muted-foreground">
+                  <div className="p-3 sm:p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">
                       <strong className="text-foreground">Note:</strong> This is a quick heuristic for low-stakes choices. 
                       For important decisions with lasting impact, consider a full analysis.
                     </p>
                   </div>
 
-                  <div className="flex gap-3">
-                    <Button variant="outline" onClick={resetQuickDecision} className="flex-1 gap-2">
-                      <RefreshCw className="h-4 w-4" />
-                      New quick decision
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                    <Button variant="outline" onClick={resetQuickDecision} className="gap-1.5 sm:gap-2 h-10 sm:h-11 text-xs sm:text-sm">
+                      <RefreshCw className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                      Try again
                     </Button>
-                    <Button onClick={convertToFullDecision} className="flex-1 gap-2">
-                      <ArrowRight className="h-4 w-4" />
+                    <Button onClick={convertToFullDecision} className="gap-1.5 sm:gap-2 h-10 sm:h-11 text-xs sm:text-sm">
+                      <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       Deep analysis
                     </Button>
                   </div>
@@ -307,7 +307,7 @@ const NewDecision = () => {
                   <Button 
                     variant="ghost" 
                     onClick={() => navigate('/dashboard')} 
-                    className="w-full"
+                    className="w-full text-xs sm:text-sm"
                   >
                     Back to dashboard
                   </Button>
@@ -324,10 +324,10 @@ const NewDecision = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border/50">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
           <button
             onClick={() => navigate('/dashboard')}
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to dashboard
@@ -335,16 +335,16 @@ const NewDecision = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-12 max-w-xl">
+      <main className="container mx-auto px-3 sm:px-4 py-6 sm:py-12 max-w-xl">
         <Card className="border-border/50">
-          <CardHeader className="text-center">
-            <div className="text-sm text-muted-foreground mb-2">Step 1 of 5</div>
-            <CardTitle className="text-2xl">What decision are you facing?</CardTitle>
-            <CardDescription>
+          <CardHeader className="text-center px-4 sm:px-6">
+            <div className="text-xs sm:text-sm text-muted-foreground mb-2">Step 1 of 5</div>
+            <CardTitle className="text-xl sm:text-2xl">What decision are you facing?</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">
               Describe the choice you need to make. Be as specific as possible.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 sm:px-6">
             {hasPaid && (
               <div className="mb-6">
                 <Button 
@@ -420,7 +420,7 @@ const NewDecision = () => {
                 />
               </div>
 
-              <Button type="submit" className="w-full gap-2" disabled={loading}>
+              <Button type="submit" className="w-full gap-2 h-11 sm:h-12 text-sm" disabled={loading}>
                 {loading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (

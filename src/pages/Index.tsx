@@ -97,10 +97,10 @@ const Index = () => {
 
       <main>
         {/* Urgency Banner */}
-        <div className="bg-primary text-primary-foreground py-2 text-center text-sm font-medium">
-          <span className="inline-flex items-center gap-2">
-            🚀 First 10 users get 1 deep decision <strong>completely FREE</strong>
-            <Button variant="secondary" size="sm" className="ml-2 h-7 text-xs" onClick={handleGetStarted}>
+        <div className="bg-primary text-primary-foreground py-2.5 px-4 text-center text-xs sm:text-sm font-medium">
+          <span className="inline-flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
+            <span>🚀 First 10 users get 1 deep decision <strong>completely FREE</strong></span>
+            <Button variant="secondary" size="sm" className="h-7 text-xs" onClick={handleGetStarted}>
               Claim yours
             </Button>
           </span>
@@ -113,7 +113,7 @@ const Index = () => {
             AI-Powered Decision Making App
           </Badge>
           
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-foreground tracking-tight leading-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold text-foreground tracking-tight leading-tight">
             Stop Overthinking.
             <br />
             <span className="text-primary">Make Decisions with AI-Powered Clarity.</span>
@@ -124,24 +124,24 @@ const Index = () => {
             and structured frameworks to help you make life's biggest choices — in minutes, not months.
           </p>
           
-          <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-2">
             <Button 
               size="lg" 
               onClick={handleGetStarted} 
-              className="gap-2 text-base md:text-lg px-8 py-6 md:py-7 group transition-all duration-300 hover:scale-105 shadow-lg"
+              className="gap-2 text-sm sm:text-base md:text-lg px-6 sm:px-8 py-5 sm:py-6 md:py-7 group transition-all duration-300 hover:scale-105 shadow-lg"
               aria-label="Start making better decisions for free"
             >
               Make your first decision — it's free
-              <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 group-hover:translate-x-1 transition-transform" />
             </Button>
             <Button 
               size="lg" 
               variant="outline"
               onClick={scrollToDemo} 
-              className="gap-2 text-base md:text-lg px-8 py-6 md:py-7 group transition-all duration-300"
+              className="gap-2 text-sm sm:text-base md:text-lg px-6 sm:px-8 py-5 sm:py-6 md:py-7 group transition-all duration-300"
               aria-label="Try the interactive decision making demo"
             >
-              <Play className="h-5 w-5" />
+              <Play className="h-4 w-4 sm:h-5 sm:w-5" />
               Try the live demo first
             </Button>
           </div>
@@ -210,7 +210,7 @@ const Index = () => {
         </section>
 
         {/* Trust Banner */}
-        <section className="py-8 border-y border-border/30 bg-muted/20" aria-label="Trust and security">
+        <section className="py-6 sm:py-8 border-y border-border/30 bg-muted/20" aria-label="Trust and security">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
               {[
@@ -219,13 +219,13 @@ const Index = () => {
                 { icon: Award, text: 'Research-backed', subtext: 'Based on decision science' },
                 { icon: Heart, text: 'No ads, ever', subtext: 'Built for you, not advertisers' },
               ].map((item, i) => (
-                <div key={i} className="flex items-center gap-3 justify-center md:justify-start">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <item.icon className="h-5 w-5 text-primary" />
+                <div key={i} className="flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-3 text-center sm:text-left">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <item.icon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-foreground">{item.text}</p>
-                    <p className="text-xs text-muted-foreground">{item.subtext}</p>
+                    <p className="text-xs sm:text-sm font-medium text-foreground">{item.text}</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground hidden sm:block">{item.subtext}</p>
                   </div>
                 </div>
               ))}
@@ -554,15 +554,15 @@ const Index = () => {
               <h2 className="text-2xl md:text-3xl font-bold text-foreground">Simple, Transparent Pricing</h2>
               <p className="mt-3 text-muted-foreground">One good decision can pay for this forever</p>
             </div>
-            <div className="grid sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 max-w-3xl mx-auto">
               {[
                 { name: 'Free', price: '£0', desc: '5 quick decisions/month', cta: 'Get Started Free', popular: false },
                 { name: 'Pro', price: '£9.99/mo', desc: 'Unlimited everything + AI', cta: 'Start 7-Day Free Trial', popular: true },
                 { name: 'Lifetime', price: '£99.99', desc: 'Pay once, own forever', cta: 'Best Value — Get Lifetime', popular: false },
               ].map((plan, i) => (
-                <Card key={i} className={`p-6 text-center ${plan.popular ? 'border-primary shadow-lg relative' : 'border-border/50'}`}>
+                <Card key={i} className={`p-5 sm:p-6 text-center ${plan.popular ? 'border-primary shadow-lg relative order-first sm:order-none' : 'border-border/50'}`}>
                   {plan.popular && (
-                    <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground">Most Popular</Badge>
+                    <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs">Most Popular</Badge>
                   )}
                   <h3 className="text-lg font-bold text-foreground">{plan.name}</h3>
                   <p className="text-2xl font-bold text-foreground mt-2">{plan.price}</p>
@@ -628,9 +628,9 @@ const Index = () => {
         </section>
       </main>
 
-      <footer className="border-t border-border/50 py-10 bg-muted/20" role="contentinfo">
+      <footer className="border-t border-border/50 py-8 sm:py-10 bg-muted/20" role="contentinfo">
         <div className="container mx-auto px-4">
-          <div className="grid sm:grid-cols-4 gap-8 mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <Lightbulb className="h-5 w-5 text-primary" />

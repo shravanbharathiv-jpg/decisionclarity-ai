@@ -270,40 +270,33 @@ const Onboarding = () => {
       ),
     },
     {
-      title: "People Like You Are Winning",
-      subtitle: "Join 1,000+ decision makers using Clarity",
+      title: "You're Ready to Start",
+      subtitle: "Make your first decision with confidence",
       content: (
         <div className="space-y-6">
-          {[
-            {
-              quote: "I was stuck for 3 months on whether to leave my job. Clarity helped me decide in one evening.",
-              author: "Sarah M.",
-              role: "Product Manager",
-            },
-            {
-              quote: "The bias detection showed me I was anchored on sunk costs. Saved me from a £50k mistake.",
-              author: "James T.",
-              role: "Startup Founder",
-            },
-            {
-              quote: "The AI recommendation gave me the confidence to finally commit. Best £10 I've spent.",
-              author: "Dr. Rachel K.",
-              role: "Clinical Psychologist",
-            },
-          ].map((item, i) => (
-            <div key={i} className="p-4 rounded-lg bg-muted/30">
-              <p className="text-sm italic text-foreground">"{item.quote}"</p>
-              <div className="mt-3 flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-medium text-primary">
-                  {item.author.charAt(0)}
-                </div>
+          <div className="text-center">
+            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Sparkles className="h-10 w-10 text-primary" />
+            </div>
+            <p className="text-lg text-muted-foreground leading-relaxed max-w-md mx-auto">
+              You've seen how Clarity works. Now it's time to make your first real decision — structured, bias-free, and with full AI support.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 gap-3 mt-6">
+            {[
+              { icon: Zap, text: "Start with a quick decision (30 seconds)", desc: "Perfect for everyday choices" },
+              { icon: Brain, text: "Or dive into a deep analysis", desc: "For life-changing decisions" },
+              { icon: Shield, text: "Everything is private & encrypted", desc: "Only you can see your decisions" },
+            ].map((item, i) => (
+              <div key={i} className="flex items-start gap-3 p-4 rounded-lg bg-muted/30 border border-border/50">
+                <item.icon className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium">{item.author}</p>
-                  <p className="text-xs text-muted-foreground">{item.role}</p>
+                  <span className="text-sm font-medium text-foreground">{item.text}</span>
+                  <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       ),
     },

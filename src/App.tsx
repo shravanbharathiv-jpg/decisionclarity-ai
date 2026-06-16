@@ -20,6 +20,8 @@ import Onboarding from "./pages/Onboarding";
 import Upgrade from "./pages/Upgrade";
 import EarlyAdopterPricing from "./pages/EarlyAdopterPricing";
 import NotFound from "./pages/NotFound";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 
 const queryClient = new QueryClient();
 

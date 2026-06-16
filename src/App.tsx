@@ -20,6 +20,8 @@ import Onboarding from "./pages/Onboarding";
 import Upgrade from "./pages/Upgrade";
 import EarlyAdopterPricing from "./pages/EarlyAdopterPricing";
 import NotFound from "./pages/NotFound";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 
 const queryClient = new QueryClient();
 
@@ -45,7 +47,10 @@ const App = () => (
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/early-adopter" element={<EarlyAdopterPricing />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="*" element={<NotFound />} />
+
           </Routes>
           <ClairAgent />
         </AuthProvider>

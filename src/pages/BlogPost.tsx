@@ -9,20 +9,17 @@ const SITE = "https://decisionclarity-ai.lovable.app";
 const BlogPost = () => {
   const { slug = "" } = useParams();
   const post = getPostBySlug(slug);
-
-  if (!post) {
-    return <Navigate to="/blog" replace />;
-  }
-
-  const related = blogPosts.filter((p) => p.slug !== post.slug).slice(0, 2);
+  const related = post ? blogPosts.filter((p) => p.slug !== post.slug).slice(0, 2) : [];
 
   useSeo({
-    title: `${post.title} | Clair`,
-    description: post.description,
-    canonicalPath: `/blog/${post.slug}`,
-    keywords: post.keywords,
+    title: post ? `${post.title} | Clair` : "Article not found | Clair",
+    description: post?.description ?? "This article could not be found.",
+    canonicalPath: post ? `/blog/${post.slug}` : "/blog",
+    keywords: post?.keywords,
     ogType: "article",
-    jsonLd: [
+    jsonLd: post
+      ? [
+
       {
         "@context": "https://schema.org",
         "@type": "BlogPosting",

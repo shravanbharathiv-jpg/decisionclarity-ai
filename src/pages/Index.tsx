@@ -647,12 +647,12 @@ const Index = () => {
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold text-foreground mb-3 text-sm">Use Cases</h4>
+              <h4 className="font-semibold text-foreground mb-3 text-sm">Learn</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>Career Decision Making</li>
-                <li>Financial Decision Analysis</li>
-                <li>Relationship Decisions</li>
-                <li>Life Decision Framework</li>
+                <li><a href="/blog" className="hover:text-primary transition-colors">Decision-Making Blog</a></li>
+                <li><a href="/blog/how-to-stop-overthinking-decisions" className="hover:text-primary transition-colors">How to Stop Overthinking</a></li>
+                <li><a href="/blog/best-decision-making-frameworks-2026" className="hover:text-primary transition-colors">Best Decision Frameworks</a></li>
+                <li><a href="/blog/cognitive-biases-ruining-your-decisions" className="hover:text-primary transition-colors">9 Cognitive Biases</a></li>
               </ul>
             </div>
             <div>
@@ -664,6 +664,7 @@ const Index = () => {
                 <li>Meet Clair (AI Coach)</li>
               </ul>
             </div>
+
           </div>
           <div className="border-t border-border/50 pt-6 text-center text-sm text-muted-foreground">
             © {new Date().getFullYear()} Clarity — AI Decision Making App. Your decisions are private, encrypted, and never sold.

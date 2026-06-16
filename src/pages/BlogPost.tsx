@@ -50,9 +50,15 @@ const BlogPost = () => {
             item: `${SITE}/blog/${post.slug}`,
           },
         ],
-      },
-    ],
+      ]
+      : undefined,
   });
+
+  if (!post) {
+    return <Navigate to="/blog" replace />;
+  }
+
+
 
   return (
     <div className="min-h-screen bg-background">

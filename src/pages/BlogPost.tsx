@@ -50,7 +50,9 @@ const BlogPost = () => {
             item: `${SITE}/blog/${post.slug}`,
           },
         ],
+      },
       ]
+
       : undefined,
   });
 

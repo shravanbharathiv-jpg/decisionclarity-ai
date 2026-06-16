@@ -47,7 +47,10 @@ const App = () => (
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/early-adopter" element={<EarlyAdopterPricing />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="*" element={<NotFound />} />
+
           </Routes>
           <ClairAgent />
         </AuthProvider>
